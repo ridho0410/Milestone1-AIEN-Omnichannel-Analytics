@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Penjelasan Semua Tabel Dataset — Milestone 1 Omnichannel Retail</title>
+<style>
+  @page { size: A4; margin: 14mm 13mm 14mm 13mm; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 9.4pt;
+    line-height: 1.45;
+    color: #1c2430;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1 { font-size: 23pt; line-height: 1.15; margin: 0 0 6px 0; color: #0f1c2e; letter-spacing: -0.4px; }
+  h2 { font-size: 14.5pt; margin: 0 0 8px 0; color: #0f1c2e; }
+  h3 { font-size: 11.5pt; margin: 0 0 4px 0; color: #0f1c2e; }
+  h4 { font-size: 9.6pt; margin: 10px 0 4px 0; color: #41506b; text-transform: uppercase; letter-spacing: 0.7px; }
+
+  p { margin: 0 0 7px 0; }
+  a { color: #1a56db; text-decoration: none; }
+  strong { color: #0f1c2e; }
+
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .avoid { break-inside: avoid; page-break-inside: avoid; }
+
+  /* ---------- cover ---------- */
+  .kicker {
+    font-size: 8pt; letter-spacing: 3.4px; text-transform: uppercase;
+    color: #6a7a94; font-weight: 600; margin-bottom: 14px;
+  }
+  .lede { font-size: 10.5pt; color: #55637a; margin: 0 0 20px 0; }
+
+  .stats { display: table; width: 100%; border-spacing: 7px 0; margin: 0 0 20px -7px; }
+  .stat {
+    display: table-cell; width: 25%;
+    background: #f2f5fa; border: 1px solid #dbe2ec; border-radius: 7px;
+    padding: 12px 11px; text-align: center; vertical-align: middle;
+  }
+  .stat .num { font-size: 18pt; font-weight: 700; color: #1a3c72; display: block; line-height: 1.1; }
+  .stat .lbl { font-size: 6.9pt; text-transform: uppercase; letter-spacing: 0.8px; color: #62718c; margin-top: 5px; display: block; }
+
+  .meta { border: 1px solid #dbe2ec; border-radius: 7px; overflow: hidden; }
+  .meta table { width: 100%; border-collapse: collapse; }
+  .meta td { padding: 6px 11px; border-bottom: 1px solid #eef1f6; font-size: 9pt; vertical-align: top; }
+  .meta tr:last-child td { border-bottom: none; }
+  .meta td:first-child { width: 128px; color: #62718c; font-weight: 600; }
+
+  /* ---------- section headings ---------- */
+  .sechead {
+    border-left: 4px solid #1a56db; padding: 2px 0 2px 11px;
+    margin: 0 0 12px 0;
+  }
+  .sechead .sub { font-size: 8.6pt; color: #6a7a94; margin-top: 2px; }
+
+  /* ---------- tables ---------- */
+  table.t { width: 100%; border-collapse: collapse; margin: 7px 0 10px 0; font-size: 8.8pt; }
+  table.t th {
+    background: #eef2f8; color: #3b4a63; text-align: left;
+    padding: 5px 8px; border-bottom: 1.5px solid #cfd8e6;
+    font-size: 7.6pt; text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  table.t td { padding: 5px 8px; border-bottom: 1px solid #edf0f5; vertical-align: top; }
+  table.t tr:nth-child(even) td { background: #fafbfd; }
+  table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  table.t td.mono { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.3pt; }
+  table.t tr.tot td { font-weight: 700; background: #eef2f8 !important; border-top: 1.5px solid #cfd8e6; }
+
+  /* ---------- tree ---------- */
+  pre.tree {
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.4pt;
+    background: #f7f9fc; border: 1px solid #e2e8f1; border-radius: 6px;
+    padding: 10px 13px; margin: 7px 0 11px 0; line-height: 1.5; color: #22303f;
+    white-space: pre; overflow: hidden;
+  }    /* ---------- code / sample ---------- */
+  pre.code {
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 8pt;
+    background: #f7f9fc; border: 1px solid #e2e8f1; border-left: 3px solid #9bb3d4;
+    border-radius: 4px; padding: 7px 11px; margin: 6px 0 9px 0;
+    white-space: pre-wrap; word-break: break-word; color: #22303f; line-height: 1.45;
+  }
+
+  /* ---------- blocks inside a table card ---------- */
+  .card {
+    border: 1px solid #dbe2ec; border-radius: 7px;
+    padding: 11px 13px 9px 13px; margin: 0 0 13px 0;
+  }
+  .card .name {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 10.6pt; font-weight: 700; color: #14243b;
+  }
+  .card .rows {
+    display: inline-block; background: #e8eefb; color: #1a3c72;
+    font-size: 7.6pt; font-weight: 700; border-radius: 20px;
+    padding: 2px 9px; margin-left: 7px; vertical-align: 2px;
+  }
+  .kv { margin: 6px 0 4px 0; }
+  .kv .k {
+    font-size: 7.4pt; text-transform: uppercase; letter-spacing: 0.7px;
+    color: #7d8ba3; font-weight: 700; display: block;
+  }
+  .kv .v { display: block; margin-bottom: 4px; }
+
+  .tujuan {
+    background: #f4f8f4; border-left: 3px solid #4b9b63;
+    padding: 7px 10px; border-radius: 0 4px 4px 0; margin: 8px 0 6px 0;
+  }
+  .masalah {
+    background: #fdf6f2; border-left: 3px solid #d1733a;
+    padding: 7px 10px; border-radius: 0 4px 4px 0; margin: 8px 0 6px 0;
+  }
+  .catatan {
+    background: #f4f7fd; border-left: 3px solid #5b83c9;
+    padding: 7px 10px; border-radius: 0 4px 4px 0; margin: 8px 0 6px 0;
+  }
+  .tujuan .lbl, .masalah .lbl, .catatan .lbl {
+    font-size: 7.4pt; text-transform: uppercase; letter-spacing: 0.7px;
+    font-weight: 700; display: block; margin-bottom: 3px;
+  }
+  .tujuan .lbl { color: #35744c; }
+  .masalah .lbl { color: #b05a26; }
+  .catatan .lbl { color: #3f63a3; }
+
+  ul.tight { margin: 4px 0 6px 0; padding-left: 17px; }
+  ul.tight li { margin-bottom: 2px; }
+
+  .badge {
+    display: inline-block; font-size: 7pt; font-weight: 700;
+    padding: 1.5px 7px; border-radius: 20px; text-transform: uppercase;
+    letter-spacing: 0.5px; vertical-align: 1.5px;
+  }
+  .b-ok { background: #e3f3e7; color: #2f7345; }
+  .b-warn { background: #fceee2; color: #a95c22; }
+  .b-crit { background: #fbe4e4; color: #a33333; }
+
+  .foot {
+    margin-top: 14px; padding-top: 9px; border-top: 1px solid #e2e8f1;
+    font-size: 7.8pt; color: #7d8ba3;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================= HALAMAN 1 ============================= -->
+<div class="page">
+  <div class="kicker">Milestone 1 &middot; Data Engineer</div>
+  <h1>Penjelasan Semua Tabel<br>Dataset Omnichannel Retail</h1>
+  <p class="lede">Apa isi tiap tabel, satu baris mewakili apa, dan untuk apa tabel itu dipakai</p>
+
+  <div class="stats">
+    <div class="stat"><span class="num">19</span><span class="lbl">File dataset tersedia</span></div>
+    <div class="stat"><span class="num">158.770</span><span class="lbl">Total baris mentah</span></div>
+    <div class="stat"><span class="num">4</span><span class="lbl">Keluarga sumber</span></div>
+    <div class="stat"><span class="num">90</span><span class="lbl">Hari data (22 Jun&ndash;19 Sep 2026)</span></div>
+  </div>
+
+  <div class="meta">
+    <table>
+      <tr><td>Proyek</td><td>Omnichannel Retail NL-to-SQL Analytics</td></tr>
+      <tr><td>Sumber data</td><td>Google Drive data lake &rarr; <span class="mono">data/raw/</span></td></tr>
+      <tr><td>Format</td><td>17 file JSON + 2 file CSV, dikelompokkan dalam 4 folder</td></tr>
+      <tr><td>Peruntukan</td><td>Dokumen belajar pribadi &mdash; tidak dikumpulkan saat submission</td></tr>
+    </table>
+  </div>
+
+  <div class="catatan">
+    <span class="lbl">Status data: lengkap</span>
+    Seluruh <strong>19 file sudah tersedia</strong>. Empat file yang sebelumnya belum dibagikan
+    instructor &mdash; <span class="mono">order_promotions.json</span>, <span class="mono">payment_events.json</span>,
+    <span class="mono">refund_events.json</span>, dan <span class="mono">web_events.json</span> &mdash; kini
+    sudah ada dan sudah ikut diproses pipeline. Dokumen ini memakai angka dari run terakhir
+    yang mencakup keempatnya.
+  </div>
+
+  <div class="foot">
+    Seluruh angka pada dokumen ini diambil langsung dari database pipeline
+    (<span class="mono">bronze</span>, <span class="mono">silver</span>, <span class="mono">gold</span>)
+    dan dari file mentah di <span class="mono">data/raw/</span>.
+  </div>
+</div>
+
+<!-- ============================= HALAMAN 2 ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>1 &middot; Gambaran besar</h2>
+    <div class="sub">Baca bagian ini dulu sebelum masuk ke tabel satu per satu.</div>
+  </div>
+
+  <p>Dataset ini mewakili satu perusahaan retail yang menjual lewat empat channel sekaligus
+  (omnichannel): website, aplikasi mobile, marketplace, dan toko fisik. Datanya sengaja dibelah
+  menjadi empat folder karena berasal dari empat sistem yang berbeda di dunia nyata &mdash; sistem
+  transaksi, sistem event, sistem gudang, dan sistem marketing.</p>
+
+<pre class="tree">data/raw/                         &larr; data lake (Google Drive)
+│
+├── operational/   11 file   58.654 baris   "Apa yang terjadi pada bisnis"
+│                  pelanggan, produk, toko, promosi, pesanan
+│
+├── events/         5 file   64.213 baris   "Apa yang sedang terjadi, detik demi detik"
+│                  pembayaran, refund, retur, support, aktivitas web
+│
+├── inventory/      1 file   35.040 baris   "Berapa stok hari ini"
+│                  snapshot harian per produk per toko
+│
+└── reference/      2 file      863 baris   "Referensi &amp; biaya marketing"
+                   kota, belanja campaign
+                                       ─────────
+                              Total   158.770 baris</pre>
+
+  <table class="t">
+    <thead>
+      <tr><th>Keluarga</th><th>Jawab pertanyaan</th><th>Karakter data</th><th class="n">Baris</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>operational</strong></td><td>Apa yang terjadi pada bisnis?</td><td>Sudah final, satu baris = satu entitas</td><td class="n">58.654</td></tr>
+      <tr><td><strong>events</strong></td><td>Apa yang sedang terjadi sekarang?</td><td>Bertambah terus, sering terulang</td><td class="n">64.213</td></tr>
+      <tr><td><strong>inventory</strong></td><td>Berapa stok hari ini?</td><td>Snapshot harian, bisa hilang</td><td class="n">35.040</td></tr>
+      <tr><td><strong>reference</strong></td><td>Berapa biaya marketing &amp; di mana lokasinya?</td><td>Kecil, sebagai pembanding</td><td class="n">863</td></tr>
+      <tr class="tot"><td colspan="3">Total</td><td class="n">158.770</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Perbedaan mendasar: tabel transaksi vs tabel event</h4>
+  <p>Dua kelompok ini sering tertukar, padahal cara memakainya sangat berbeda:</p>
+
+  <table class="t">
+    <thead>
+      <tr><th style="width:22%"></th><th>Tabel transaksi (operational)</th><th>Tabel event (events)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Satu baris =</strong></td><td>Satu entitas final (satu order, satu produk)</td><td>Satu kejadian (satu "order diterima", satu "retur ditutup")</td></tr>
+      <tr><td><strong>Bisa duplikat?</strong></td><td>Harusnya tidak &mdash; kalau ada, itu bug</td><td>Wajar, satu order punya banyak event</td></tr>
+      <tr><td><strong>Berisi status?</strong></td><td>Ya, status akhir</td><td>Tidak &mdash; status justru harus disusun ulang dari urutan event</td></tr>
+      <tr><td><strong>Diolah di</strong></td><td>Silver sebagai dimensi/fakta</td><td>Silver sebagai log, lalu dirangkum di Gold</td></tr>
+    </tbody>
+  </table>
+
+  <div class="catatan">
+    <span class="lbl">Aturan emas membaca dokumen ini</span>
+    Setiap tabel punya empat bagian &mdash; <strong>Apa ini</strong> (definisi), <strong>Satu baris =</strong> (grain),
+    <strong>Kolom</strong> (arti tiap kolom), dan <strong>Tujuan</strong> (ke tabel mana isinya mengalir).
+    Bagian <strong>Masalah</strong> hanya muncul kalau tabel itu memang sengaja dibuat bermasalah oleh instructor.
+  </div>
+</div>
+
+<!-- ============================= A · operational ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>A &middot; operational/</h2>
+    <div class="sub">11 file &middot; 58.654 baris &middot; inti bisnis</div>
+  </div>
+
+  <p>Folder terbesar dan paling penting. Semua angka revenue di Gold pada akhirnya berakar dari dua
+  tabel di sini: <span class="mono">orders</span> dan <span class="mono">order_items</span>.</p>
+
+  <!-- customers -->
+  <div class="card avoid">
+    <div><span class="name">customers.json</span><span class="rows">2.500 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Daftar master seluruh pelanggan perusahaan. Satu identitas permanen, tidak berubah-ubah.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu pelanggan (kunci <span class="mono">customer_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">customer_id</td><td>text</td><td>Kunci utama. Nilai seperti <span class="mono">CUST-00001</span></td></tr>
+        <tr><td class="mono">city_id</td><td>text</td><td>Kota domisili. Menunjuk ke <span class="mono">city_reference</span></td></tr>
+        <tr><td class="mono">customer_segment</td><td>text</td><td>Kelas pelanggan. Tiga nilai: <span class="mono">consumer</span> (813), <span class="mono">enterprise</span> (895), <span class="mono">small_business</span> (792)</td></tr>
+        <tr><td class="mono">created_at_utc</td><td>timestamptz</td><td>Tanggal pelanggan pertama kali terdaftar</td></tr>
+        <tr><td class="mono">source_row_id</td><td>text</td><td>Nomor baris di file sumber &mdash; dipakai untuk melacak asal-usul</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"customer_id": "CUST-00001", "city_id": "JKT", "customer_segment": "consumer",
+ "created_at": "2025-07-29", "source_row_id": "CUSTOMER-ROW-000001"}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Menjadi dimensi <span class="mono">silver.customers</span>, lalu jadi acuan
+      <span class="mono">gold.customer_daily</span> dan <span class="mono">gold.executive_kpis_daily</span>
+      (menghitung pelanggan aktif per hari).
+    </div>
+    <div class="catatan">
+      <span class="lbl">Beda dengan customer_profiles</span>
+      Tabel ini hanya menyimpan versi terbaru saja. Kalau ingin melihat riwayat perubahan
+      segmen/kota, pakai <span class="mono">customer_profiles.json</span>.
+    </div>
+  </div>
+
+  <!-- customer_profiles -->
+  <div class="card avoid">
+    <div><span class="name">customer_profiles.json</span><span class="rows">2.777 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Riwayat versi profil pelanggan. Menyimpan setiap kali segmen atau kota pelanggan berubah, lengkap dengan rentang waktu berlakunya.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu versi profil pada satu periode (kunci <span class="mono">customer_id</span> + <span class="mono">valid_from_utc</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">customer_id</td><td>text</td><td>Pelanggan yang dimaksud</td></tr>
+        <tr><td class="mono">valid_from_utc</td><td>timestamptz</td><td>Versi ini mulai berlaku sejak kapan</td></tr>
+        <tr><td class="mono">valid_to_utc</td><td>timestamptz</td><td>Versi ini berlaku sampai kapan</td></tr>
+        <tr><td class="mono">city_id</td><td>text</td><td>Kota selama periode ini</td></tr>
+        <tr><td class="mono">customer_segment</td><td>text</td><td>Segmen selama periode ini</td></tr>
+        <tr><td class="mono">source_row_id</td><td>text</td><td>Penanda baris sumber</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"customer_id": "CUST-00001", "city_id": "JKT", "customer_segment": "consumer",
+ "valid_from_utc": "2025-07-29T00:00:00Z", "valid_to_utc": "2026-09-21T00:00:00Z"}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Pola ini namanya <strong>SCD Type-2</strong> (Slowly Changing Dimension). Tanpa tabel ini,
+      laporan "pelanggan enterprise menghasilkan berapa" akan selalu memakai segmen terbaru untuk
+      semua transaksi lama &mdash; termasuk transaksi yang terjadi saat pelanggan itu masih consumer.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Bukti di data &mdash; masalah #7</span>
+      2.777 baris untuk 2.500 pelanggan, artinya <strong>277 pelanggan pernah berubah profil</strong>.
+      Bedanya bukan kebetulan &mdash; itu memang sengaja disisipkan.
+    </div>
+  </div>
+
+  <!-- customer_addresses -->
+  <div class="card avoid">
+    <div><span class="name">customer_addresses.json</span><span class="rows">2.500 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Daftar alamat pelanggan, juga disimpan dalam bentuk riwayat berlaku (SCD).</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu alamat pada satu periode berlaku (kunci <span class="mono">address_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">address_id</td><td>text</td><td>Kunci alamat, seperti <span class="mono">ADDR-000001</span></td></tr>
+        <tr><td class="mono">customer_id</td><td>text</td><td>Pemilik alamat</td></tr>
+        <tr><td class="mono">city_id</td><td>text</td><td>Kota alamat tersebut</td></tr>
+        <tr><td class="mono">valid_from_utc</td><td>timestamptz</td><td>Mulai berlaku</td></tr>
+        <tr><td class="mono">valid_to_utc</td><td>timestamptz</td><td>Berakhir</td></tr>
+      </tbody>
+    </table>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Menghubungkan pelanggan ke kota. Strukturnya sengaja disiapkan untuk SCD, tapi pada dataset ini
+      tiap pelanggan baru punya satu baris (2.500 baris untuk 2.500 pelanggan, tidak ada yang ganda).
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- products -->
+  <div class="card avoid">
+    <div><span class="name">products.json</span><span class="rows">80 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Master produk &mdash; daftar semua barang yang dijual beserta harga dasarnya.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu produk (kunci <span class="mono">product_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">product_id</td><td>text</td><td>Kunci produk, seperti <span class="mono">PROD-00001</span></td></tr>
+        <tr><td class="mono">product_name</td><td>text</td><td>Nama produk</td></tr>
+        <tr><td class="mono">sku</td><td>text</td><td>Kode unit penyimpanan gudang (barcode internal)</td></tr>
+        <tr><td class="mono">unit_price</td><td>numeric</td><td>Harga jual satuan, mis. 92.83</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"product_id": "PROD-00001", "product_name": "Synthetic Product 0001",
+ "sku": "SKU-000001", "unit_price": 92.83}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Menjadi <span class="mono">silver.products</span>. Setiap <span class="mono">order_item</span> harus menunjuk ke
+      produk di sini &mdash; kalau tidak, item itu ditolak dengan alasan
+      <span class="mono">BROKEN_PRODUCT_REFERENCE</span>.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #5 yang disisipkan &mdash; referensi putus</span>
+      Di file <span class="mono">order_items</span> ada <strong>3 baris</strong> yang menunjuk <span class="mono">product_id</span>
+      yang tidak ada di tabel ini. Itu sengaja, untuk menguji validasi referensi.
+    </div>
+  </div>
+
+  <!-- product_categories -->
+  <div class="card avoid">
+    <div><span class="name">product_categories.json</span><span class="rows">86 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Riwayat kategori tiap produk. Menyimpan setiap kali sebuah produk berpindah kategori.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu produk pada satu kategori selama rentang waktu tertentu</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">product_id</td><td>text</td><td>Produk yang dimaksud</td></tr>
+        <tr><td class="mono">valid_from_utc / valid_to_utc</td><td>timestamptz</td><td>Rentang kategori ini berlaku</td></tr>
+        <tr><td class="mono">category_id</td><td>text</td><td>Kode kategori, mis. <span class="mono">CAT-02</span></td></tr>
+        <tr><td class="mono">category_name</td><td>text</td><td>Nama kategori. Enam nilai: beauty, electronics, fashion, grocery, home, sports</td></tr>
+      </tbody>
+    </table>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Supaya laporan <span class="mono">gold.product_daily</span> memakai kategori yang berlaku pada tanggal
+      penjualan, bukan kategori terbarunya. Contoh nyata: <span class="mono">PROD-00013</span> berpindah dari
+      <em>electronics</em> (sampai 2026-08-10) ke <em>home</em> (mulai 2026-08-11).
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #7 yang disisipkan &mdash; kategori berubah</span>
+      86 baris untuk 80 produk &mdash; <strong>6 produk</strong> (PROD-00013, 00026, 00039, 00052, 00065, 00078)
+      punya dua kategori. Bedanya bukan duplikat, tapi riwayat.
+    </div>
+  </div>
+
+  <!-- stores -->
+  <div class="card avoid">
+    <div><span class="name">stores.json</span><span class="rows">5 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Daftar toko fisik milik perusahaan.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu toko (kunci <span class="mono">store_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">store_id</td><td>text</td><td>STORE-01 &hellip; STORE-05</td></tr>
+        <tr><td class="mono">store_name</td><td>text</td><td>Nama toko</td></tr>
+        <tr><td class="mono">city_id</td><td>text</td><td>Kota tempat toko berada (BDG, SBY, MDN, DPS, MKS)</td></tr>
+        <tr><td class="mono">location_type</td><td>text</td><td>Jenis lokasi &mdash; kelima toko bernilai <span class="mono">physical</span></td></tr>
+      </tbody>
+    </table>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Melengkapi order channel <span class="mono">STORE</span>. 2.517 order berasal dari toko fisik dan punya
+      <span class="mono">store_id</span>; 7.483 order lainnya NULL karena datang dari channel online.
+    </div>
+  </div>
+
+  <!-- sales_channels -->
+  <div class="card avoid">
+    <div><span class="name">sales_channels.json</span><span class="rows">4 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Daftar channel penjualan &mdash; cara pelanggan membeli.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu channel (kunci <span class="mono">channel_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">channel_id</td><td>text</td><td>WEB, MOBILE_APP, MARKETPLACE, STORE</td></tr>
+        <tr><td class="mono">channel_name</td><td>text</td><td>Nama tampilan (sama nilainya dengan ID)</td></tr>
+      </tbody>
+    </table>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Jadi acuan pembagian penjualan per channel di <span class="mono">gold.channel_campaign_daily</span>.
+      Keempat channel hampir seimbang: STORE 2.517 &middot; WEB 2.507 &middot; MOBILE_APP 2.495 &middot; MARKETPLACE 2.482 order.
+    </div>
+    <div class="catatan">
+      <span class="lbl">Perhatian</span>
+      Campaign di <span class="mono">campaign_spend.csv</span> hanya mencakup tiga channel digital &mdash;
+      tidak ada campaign untuk channel STORE.
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- promotions -->
+  <div class="card avoid">
+    <div><span class="name">promotions.json</span><span class="rows">12 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Daftar program promosi beserta periode berlakunya dan besarnya diskon.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu program promosi (kunci <span class="mono">promotion_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">promotion_id</td><td>text</td><td>PROMO-001 &hellip; PROMO-012</td></tr>
+        <tr><td class="mono">promotion_code</td><td>text</td><td>Kode yang diketik pelanggan, mis. <span class="mono">SAVE01</span></td></tr>
+        <tr><td class="mono">promotion_type</td><td>text</td><td><span class="mono">percentage</span> (6 promosi) atau <span class="mono">fixed_amount</span> (6 promosi)</td></tr>
+        <tr><td class="mono">discount_rate</td><td>numeric</td><td>Besar diskon, mis. 0.1 = 10%</td></tr>
+        <tr><td class="mono">start_date / end_date</td><td>date</td><td>Periode promosi aktif</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"promotion_id": "PROMO-001", "promotion_code": "SAVE01", "promotion_type": "percentage",
+ "discount_rate": 0.1, "start_date": "2026-06-26", "end_date": "2026-07-21"}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Menghitung <span class="mono">promotion_count</span> di <span class="mono">gold.product_daily</span> &mdash;
+      berapa banyak promosi yang aktif pada tanggal sebuah order dibuat.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #10 yang disisipkan (paling berbahaya) &mdash; fact multiplication</span>
+      12 promosi aktif bersamaan bisa membuat satu order ikut dihitung 12 kali kalau langsung di-join.
+      Itulah <em>fact multiplication</em>, dan Gold menghindarinya dengan menghitung promosi lewat
+      subquery, bukan join.
+    </div>
+  </div>
+
+  <!-- orders -->
+  <div class="card avoid">
+    <div><span class="name">orders.json</span><span class="rows">10.001 baris &rarr; 10.000 unik</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Tabel terpenting: seluruh pesanan pelanggan beserta status dan nilai kiriman.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu order (kunci <span class="mono">order_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">order_id</td><td>text</td><td>Kunci order, seperti <span class="mono">ORD-000001</span></td></tr>
+        <tr><td class="mono">customer_id</td><td>text</td><td>Pembeli</td></tr>
+        <tr><td class="mono">ordered_at_utc</td><td>timestamptz</td><td>Tanggal &amp; jam order. Rentang data: 22 Jun &ndash; 19 Sep 2026</td></tr>
+        <tr><td class="mono">sales_channel</td><td>text</td><td>Dibeli lewat apa (4 channel)</td></tr>
+        <tr><td class="mono">store_id</td><td>text / null</td><td>Toko fisik &mdash; NULL untuk order online (7.483 baris)</td></tr>
+        <tr><td class="mono">status</td><td>text</td><td>PLACED 3.492 &middot; FULFILLED 2.561 &middot; CONFIRMED 1.967 &middot; CANCELLED 1.215 &middot; RETURNED 765</td></tr>
+        <tr><td class="mono">shipping_revenue</td><td>numeric</td><td>Pendapatan ongkos kirim</td></tr>
+        <tr><td class="mono">updated_at_utc</td><td>timestamptz</td><td>Update terakhir &mdash; dipakai untuk memilih versi saat duplikat</td></tr>
+        <tr><td class="mono">source_row_id</td><td>text</td><td>Penanda baris sumber</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"order_id": "ORD-000001", "customer_id": "CUST-01757",
+ "ordered_at_utc": "2026-08-20T06:16:00Z", "sales_channel": "MOBILE_APP",
+ "shipping_revenue": 12.0, "status": "PLACED", "store_id": null,
+ "updated_at_utc": "2026-08-20T23:16:00Z"}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Menjadi <span class="mono">silver.orders</span>, lalu jadi tulang punggung seluruh lima tabel Gold.
+      Semua revenue, AOV, dan KPI harian dihitung dari sini.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #1 yang disisipkan &mdash; duplikat order</span>
+      File berisi 10.001 baris untuk 10.000 order unik. <span class="mono">ORD-000001</span> muncul dua kali.
+      Penanganan: ambil baris dengan <span class="mono">updated_at_utc</span> terbesar (versi terbaru), dan tandai
+      baris pemenang dengan <span class="mono">had_duplicate = true</span> supaya duplikatnya tetap bisa diaudit.
+      Terverifikasi: tepat <strong>1 baris</strong> bertanda duplikat di <span class="mono">silver.orders</span>.
+    </div>
+  </div>
+
+  <!-- order_items -->
+  <div class="card avoid">
+    <div><span class="name">order_items.json</span><span class="rows">24.960 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Rincian isi tiap order &mdash; produk mana, berapa banyak, berapa harganya. Satu order bisa berisi banyak baris.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu produk di dalam satu order (kunci <span class="mono">order_item_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">order_item_id</td><td>text</td><td>Kunci baris, seperti <span class="mono">ITEM-000001-01</span></td></tr>
+        <tr><td class="mono">order_id</td><td>text</td><td>Order pemilik &mdash; harus ada di <span class="mono">orders</span></td></tr>
+        <tr><td class="mono">product_id</td><td>text</td><td>Produk yang dibeli &mdash; harus ada di <span class="mono">products</span></td></tr>
+        <tr><td class="mono">quantity</td><td>integer</td><td>Jumlah unit. Wajib &gt; 0</td></tr>
+        <tr><td class="mono">unit_price</td><td>numeric</td><td>Harga satuan saat transaksi (bukan harga terbaru)</td></tr>
+        <tr><td class="mono">item_discount_amount</td><td>numeric</td><td>Diskon khusus baris ini</td></tr>
+        <tr><td class="mono">source_row_id</td><td>text</td><td>Penanda baris sumber</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"order_item_id": "ITEM-000001-01", "order_id": "ORD-000001", "product_id": "PROD-00012",
+ "quantity": 3, "unit_price": 353.75, "item_discount_amount": 0}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Sumber utama perhitungan uang di Gold. <span class="mono">gross_merchandise_value = quantity &times; unit_price</span>
+      per order, dan dari sini juga dihitung <span class="mono">gold.product_daily</span>. Tiga dari empat alasan
+      penolakan di dataset ini berasal dari tabel ini.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #5 dan #6 yang disisipkan &mdash; 4 baris tidak valid</span>
+      <ul class="tight">
+        <li><strong>3 baris</strong> menunjuk produk yang tidak ada &rarr; ditolak, kode <span class="mono">BROKEN_PRODUCT_REFERENCE</span></li>
+        <li><strong>1 baris</strong> punya <span class="mono">quantity &le; 0</span> &rarr; ditolak, kode <span class="mono">NEGATIVE_OR_ZERO_QUANTITY</span></li>
+      </ul>
+      Hasilnya: 24.960 &rarr; <strong>24.956 baris valid</strong>. Keempatnya tercatat di
+      <span class="mono">silver.rejected_records</span>, tidak dihapus diam-diam.
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- order_promotions -->
+  <div class="card avoid">
+    <div><span class="name">order_promotions.json</span><span class="rows">15.729 baris</span> <span class="badge b-ok">kini tersedia</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Tabel jembatan yang menghubungkan order dengan promosi yang benar-benar dipakainya.
+      Satu order bisa memakai lebih dari satu promosi, jadi satu order bisa muncul di beberapa baris.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu pasang order + promosi (kunci <span class="mono">order_id</span> + <span class="mono">promotion_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">order_id</td><td>text</td><td>Order yang memakai promosi</td></tr>
+        <tr><td class="mono">promotion_id</td><td>text</td><td>Promosi yang dipakai &mdash; menunjuk ke <span class="mono">promotions</span></td></tr>
+        <tr><td class="mono">discount_amount</td><td>numeric</td><td>Diskon yang benar-benar diterapkan pada pasangan ini</td></tr>
+        <tr><td class="mono">source_row_id</td><td>text</td><td>Penanda baris sumber, mis. <span class="mono">ORDER-PROMO-ROW-0000001-PROMO-006</span></td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"discount_amount": 5, "order_id": "ORD-000001", "promotion_id": "PROMO-006",
+ "source_row_id": "ORDER-PROMO-ROW-0000001-PROMO-006"}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Menghitung <span class="mono">promotion_count</span> yang akurat di <span class="mono">gold.order_360</span> &mdash;
+      persis berapa promosi yang dipakai tiap order. Terverifikasi: <strong>9.064 order</strong> memakai promosi,
+      dengan <strong>12 promosi</strong> berbeda.
+    </div>
+    <div class="catatan">
+      <span class="lbl">Catatan struktur &mdash; file sumber berbeda dari dugaan</span>
+      File ini memakai nama kolom <span class="mono">discount_amount</span>, <strong>bukan</strong>
+      <span class="mono">applied_discount</span>. Dan ia <strong>tidak menyimpan</strong>
+      <span class="mono">promotion_code</span> &mdash; kode promosi diambil dengan mencarinya ke tabel
+      <span class="mono">silver.promotions</span> berdasarkan <span class="mono">promotion_id</span>.
+      Kedua penyesuaian ini didokumentasikan terbuka di <span class="mono">build_silver.sql</span>.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #10 yang disisipkan &mdash; berpotensi menggandakan fact</span>
+      15.729 baris untuk 9.064 order berarti rata-rata satu order memakai <strong>1,7 promosi</strong>.
+      Kalau tabel ini langsung di-join ke level order, satu order akan berlipat menjadi beberapa baris
+      dan seluruh nilai revenue ikut tergandakan. Gold menghindarinya dengan mengagregasi
+      <span class="mono">COUNT(*)</span> per <span class="mono">order_id</span> lebih dulu di dalam CTE,
+      baru di-join.
+    </div>
+  </div>
+
+  <div class="catatan">
+    <span class="lbl">Ringkasan folder operational/</span>
+    11 file &middot; 58.654 baris. Sepuluh di antaranya adalah data transaksi murni; satu
+    (<span class="mono">order_promotions</span>) adalah tabel jembatan many-to-many antara order dan promosi.
+  </div>
+</div>
+
+<!-- ============================= B · events ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>B &middot; events/</h2>
+    <div class="sub">5 dari 5 file tersedia &middot; 64.213 baris</div>
+  </div>
+
+  <p>Semua file event berbagi struktur yang sama: pembungkus <span class="mono">event_id</span> +
+  <span class="mono">event_type</span> + dua timestamp, lalu data aslinya tersembunyi di dalam objek
+  <span class="mono">payload</span>. Struktur berlapis ini meniru format log nyata.</p>
+
+<pre class="code">{
+  "event_id":         "EVT-00036639",          &larr; kunci unik (tapi bisa terulang = duplikat)
+  "event_type":       "RETURN_CLOSED",          &larr; jenis kejadian
+  "occurred_at_utc":  "2026-08-22T01:10:00Z",  &larr; KAPAN kejadiannya  &larr; dipakai untuk analitik
+  "ingested_at_utc":  "2026-08-22T09:10:00Z",  &larr; KAPAN diterima sistem (bisa jauh lebih lambat)
+  "payload": { ...data inti di sini... }         &larr; nested, bukan di root
+}</pre>
+
+  <h4>Dua timestamp, dua masalah</h4>
+  <p>Kalau selisih <span class="mono">ingested_at_utc</span> &minus; <span class="mono">occurred_at_utc</span>
+  lebih dari 24 jam, event ditandai <span class="mono">is_late = true</span>.
+  Dari seluruh data, <strong>3.659 event terlambat</strong>:</p>
+
+  <table class="t">
+    <thead><tr><th>File event</th><th class="n">Total</th><th class="n">Terlambat</th><th class="n">%</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">web_events.json</td><td class="n">30.000</td><td class="n">1.807</td><td class="n">6,0%</td></tr>
+      <tr><td class="mono">payment_events.json</td><td class="n">21.915</td><td class="n">1.254</td><td class="n">5,7%</td></tr>
+      <tr><td class="mono">refund_events.json</td><td class="n">3.982</td><td class="n">240</td><td class="n">6,0%</td></tr>
+      <tr><td class="mono">return_events.json</td><td class="n">3.440</td><td class="n">192</td><td class="n">5,6%</td></tr>
+      <tr><td class="mono">support_events.json</td><td class="n">2.870</td><td class="n">166</td><td class="n">5,8%</td></tr>
+      <tr class="tot"><td>Total</td><td class="n">62.207</td><td class="n">3.659</td><td class="n">5,9%</td></tr>
+    </tbody>
+  </table>
+
+  <p>Event tetap diproses &mdash; hanya ditandai, karena membuangnya berarti menghilangkan transaksi
+  sungguhan. Polanya konsisten: yang normal tiba dalam hitungan jam, yang terlambat tiba puluhan jam
+  kemudian.</p>
+
+  <div class="masalah">
+    <span class="lbl">Masalah #3 &mdash; event terlambat dan timestamp tidak berurutan</span>
+    Dua gejala sekaligus. Pertama, 3.659 event tiba lebih dari 24 jam setelah kejadiannya. Kedua,
+    <strong>urutan kedatangan event tidak kronologis</strong> &mdash; retur bisa tercatat
+    <em>received</em> sebelum <em>requested</em>. Karena itu status tidak diambil dari "event terakhir",
+    melainkan dari <strong>tahap tertinggi</strong> yang pernah dicapai
+    (requested &rarr; received &rarr; closed).
+  </div>
+
+  <div class="masalah">
+    <span class="lbl">Masalah #4 &mdash; timestamp dengan timezone berbeda</span>
+    Tidak semua <span class="mono">occurred_at_utc</span> memakai akhiran <span class="mono">Z</span> (UTC).
+    Sebanyak <strong>5.837 event</strong> tercatat dengan offset <span class="mono">+07:00</span> (WIB) &mdash;
+    sisa dari sistem sumber yang memakai waktu lokal Jakarta.
+    Penanganan: semua timestamp di-cast ke <span class="mono">timestamptz</span> di Silver, sehingga
+    PostgreSQL menormalkannya ke UTC secara otomatis. Tanggal bisnis juga dihitung dengan
+    <span class="mono">AT TIME ZONE 'UTC'</span> secara eksplisit, jadi tidak bergantung setelan server.
+  </div>
+</div>
+
+<div class="page">
+  <!-- return_events -->
+  <div class="card avoid">
+    <div><span class="name">return_events.json</span><span class="rows">3.553 baris &rarr; 3.440 unik</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Log proses retur barang. Satu retur menghasilkan beberapa event sepanjang tahapannya.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu kejadian dalam proses retur (kunci <span class="mono">event_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">event_id</td><td>text</td><td>Kunci unik event</td></tr>
+        <tr><td class="mono">event_type</td><td>text</td><td>RETURN_REQUESTED &middot; RETURN_RECEIVED &middot; RETURN_CLOSED</td></tr>
+        <tr><td class="mono">payload.order_id</td><td>text</td><td>Order yang diretur</td></tr>
+        <tr><td class="mono">payload.return_id</td><td>text</td><td>ID retur, seperti <span class="mono">RETURN-ORD-005899</span></td></tr>
+        <tr><td class="mono">occurred_at_utc</td><td>timestamptz</td><td>Waktu kejadian &mdash; ini yang dipakai untuk analitik</td></tr>
+        <tr><td class="mono">ingested_at_utc</td><td>timestamptz</td><td>Waktu diterima sistem (bisa selisih 1&ndash;56 jam)</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"event_id": "EVT-00036639", "event_type": "RETURN_CLOSED",
+ "occurred_at_utc": "2026-08-22T01:10:00Z", "ingested_at_utc": "2026-08-22T09:10:00Z",
+ "payload": {"order_id": "ORD-005899", "return_id": "RETURN-ORD-005899"}}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Membangun kolom <span class="mono">return_status</span> di <span class="mono">gold.order_360</span>.
+      Karena urutan event bisa tidak berurutan, status diambil dari tahap tertinggi yang pernah dicapai
+      (requested &rarr; received &rarr; closed), bukan event terakhir yang datang. Juga mengisi
+      <span class="mono">return_count</span> di <span class="mono">gold.customer_daily</span>.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #1 yang disisipkan &mdash; event duplikat</span>
+      3.553 baris berisi hanya 3.440 <span class="mono">event_id</span> unik &mdash; <strong>113 event
+      terkirim dua kali</strong> (simulasi retry). Penanganan: <span class="mono">DISTINCT ON (event_id)</span>
+      memilih yang <span class="mono">ingested_at_utc</span>-nya terbaru, dan seluruh duplikatnya dicatat di
+      <span class="mono">rejected_records</span>.
+    </div>
+    <div class="catatan">
+      <span class="lbl">Hasil tahapan di Gold</span>
+      requested 1.372 &middot; received 1.121 &middot; closed 947 event. Setelah dirangkum per order:
+      <span class="mono">none</span> 8.628 &middot; <span class="mono">closed</span> 947 &middot;
+      <span class="mono">requested</span> 251 &middot; <span class="mono">received</span> 174.
+    </div>
+  </div>
+
+  <!-- support_events -->
+  <div class="card avoid">
+    <div><span class="name">support_events.json</span><span class="rows">2.971 baris &rarr; 2.870 unik</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Log kontak pelanggan ke tim customer support &mdash; mencakup pembukaan dan penutupan tiket.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu kejadian pada satu tiket support (kunci <span class="mono">event_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">event_id</td><td>text</td><td>Kunci unik event</td></tr>
+        <tr><td class="mono">payload.ticket_id</td><td>text</td><td>ID tiket &mdash; ada 1.619 tiket unik</td></tr>
+        <tr><td class="mono">payload.customer_id</td><td>text</td><td>Pelanggan yang menghubungi</td></tr>
+        <tr><td class="mono">payload.order_id</td><td>text</td><td>Order terkait (kalau ada)</td></tr>
+        <tr><td class="mono">payload.reason</td><td>text</td><td>Alasan kontak: product 445 &middot; payment 444 &middot; refund 405 &middot; delivery 372</td></tr>
+        <tr><td class="mono">event_type</td><td>text</td><td>SUPPORT_TICKET_CREATED &middot; SUPPORT_TICKET_CLOSED</td></tr>
+        <tr><td class="mono">occurred / ingested</td><td>timestamptz</td><td>Sama seperti tabel event lain</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"event_id": "EVT-00003409", "event_type": "SUPPORT_TICKET_CREATED",
+ "payload": {"ticket_id": "TICKET-ORD-000554", "customer_id": "CUST-00549",
+             "order_id": "ORD-000554", "reason": "refund"}}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Mengisi dua metrik &mdash; <span class="mono">support_contacts</span> di
+      <span class="mono">gold.customer_daily</span> (berapa kali pelanggan ini menghubungi support pada hari itu)
+      dan <span class="mono">support_contact_rate</span> di <span class="mono">gold.executive_kpis_daily</span>
+      (berapa persen pelanggan aktif hari itu menghubungi support).
+    </div>
+    <div class="catatan">
+      <span class="lbl">Dua hal yang perlu diperhatikan</span>
+      <ul class="tight">
+        <li><strong>101 event duplikat</strong> (2.971 &rarr; 2.870 unik), ditangani sama seperti retur.</li>
+        <li>Kolom <span class="mono">reason</span> kosong di 1.305 baris &mdash; itu baris CLOSED, yang memang
+        tidak menyimpan alasan. Jangan dihitung sebagai "data hilang": jumlahnya persis sama dengan
+        jumlah event penutupan.</li>
+      </ul>
+      Hasil tahapan: created 1.619 &middot; closed 1.251 event.
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- payment_events -->
+  <div class="card avoid">
+    <div><span class="name">payment_events.json</span><span class="rows">22.582 baris &rarr; 21.915 unik</span> <span class="badge b-ok">kini tersedia</span> <span class="badge b-crit">kritis</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Log pembayaran &mdash; mencatat setiap kali dana berhasil (atau gagal) ditagih untuk sebuah order.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu percobaan/keberhasilan pembayaran (kunci <span class="mono">event_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">event_id</td><td>text</td><td>Kunci unik event</td></tr>
+        <tr><td class="mono">event_type</td><td>text</td><td>PAYMENT_CAPTURED 11.030 &middot; PAYMENT_AUTHORIZED 10.302 &middot; PAYMENT_FAILED 1.250</td></tr>
+        <tr><td class="mono">payload.order_id</td><td>text</td><td>Order yang dibayar</td></tr>
+        <tr><td class="mono">payload.amount</td><td>numeric</td><td>Nilai pembayaran. Bisa terbelah jadi beberapa event (split payment)</td></tr>
+        <tr><td class="mono">payload.payment_id</td><td>text</td><td>ID pembayaran, seperti <span class="mono">PAY-ORD-001121</span></td></tr>
+        <tr><td class="mono">occurred / ingested</td><td>timestamptz</td><td>Sama seperti tabel event lain</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"event_id": "EVT-00006883", "event_type": "PAYMENT_CAPTURED",
+ "occurred_at_utc": "2026-07-19T18:14:00Z", "ingested_at_utc": "2026-07-20T01:14:00Z",
+ "payload": {"amount": 2172.62, "order_id": "ORD-001121", "payment_id": "PAY-ORD-001121"}}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Mengisi <span class="mono">captured_payment_amount</span> dan <span class="mono">payment_status</span>
+      di <span class="mono">gold.order_360</span>, serta menjadi penyebut dari <span class="mono">refund_rate</span>
+      di <span class="mono">gold.executive_kpis_daily</span>.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #2 yang disisipkan &mdash; split payment</span>
+      <strong>1.915 order</strong> punya lebih dari satu event <span class="mono">CAPTURED</span> untuk order yang
+      sama &mdash; dana ditagih bertahap. Kalau hanya satu event yang diambil, nilai pembayaran order itu akan
+      kurang dari seharusnya. Penanganan: <span class="mono">SUM(amount) FILTER (WHERE status IN ('CAPTURED',
+      'SETTLED', 'PAID', 'SUCCESS'))</span> &mdash; seluruh potongan dijumlahkan, tapi hanya yang benar-benar tertagih.
+    </div>
+    <div class="catatan">
+      <span class="lbl">Status pembayaran di Gold</span>
+      Setelah digabungkan ke level order: <span class="mono">captured</span> 7.039 &middot;
+      <span class="mono">refunded</span> 1.991 &middot; <span class="mono">not_captured</span> 970.
+      Total dana tertagih terverifikasi: <strong>13.137.988,14</strong>.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #8 yang disisipkan &mdash; order dibatalkan tapi payment sudah captured</span>
+      Ini state yang tidak seharusnya terjadi: barang batal, tapi uang sudah masuk. Kode penanganannya
+      <strong>sudah ada</strong> &mdash; <span class="mono">payment_status = 'refunded'</span> menang atas
+      <span class="mono">'captured'</span>, dan <span class="mono">refund_rate</span> memakai penyebut
+      "order yang payment-nya captured", bukan "semua order".
+      <br><br>
+      <strong>Namun pada dataset ini kasusnya nol.</strong> Terverifikasi: dari 1.215 order
+      <span class="mono">cancelled</span>, <strong>tidak satu pun</strong> punya
+      <span class="mono">captured_payment_amount &gt; 0</span>. Jadi masalah ini disiapkan, tapi datanya
+      belum memicunya &mdash; dan belum ada quality check khusus untuknya. Ini satu-satunya dari sepuluh
+      masalah yang belum punya bukti angka.
+    </div>
+  </div>
+
+  <!-- refund_events -->
+  <div class="card avoid">
+    <div><span class="name">refund_events.json</span><span class="rows">4.121 baris &rarr; 3.982 unik</span> <span class="badge b-ok">kini tersedia</span> <span class="badge b-crit">kritis</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Log pengembalian dana kepada pelanggan &mdash; pasangan dari payment_events.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu aksi refund (kunci <span class="mono">event_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">event_id</td><td>text</td><td>Kunci unik event</td></tr>
+        <tr><td class="mono">event_type</td><td>text</td><td>REFUND_COMPLETED 2.064 &middot; REFUND_ISSUED 2.057</td></tr>
+        <tr><td class="mono">payload.order_id</td><td>text</td><td>Order yang direfund</td></tr>
+        <tr><td class="mono">payload.amount</td><td>numeric</td><td>Nilai yang dikembalikan. Bisa sebagian (partial refund)</td></tr>
+        <tr><td class="mono">payload.refund_id</td><td>text</td><td>ID refund, seperti <span class="mono">REF-ORD-006441</span></td></tr>
+        <tr><td class="mono">occurred / ingested</td><td>timestamptz</td><td>Sama seperti tabel event lain</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"event_id": "EVT-00040083", "event_type": "REFUND_ISSUED",
+ "occurred_at_utc": "2026-06-25T16:16:00Z", "ingested_at_utc": "2026-06-25T20:16:00Z",
+ "payload": {"amount": 425.51, "order_id": "ORD-006441", "refund_id": "REF-ORD-006441"}}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Mengisi <span class="mono">refunded_amount</span> di <span class="mono">gold.order_360</span> &mdash;
+      komponen yang mengurangi <span class="mono">net_revenue</span> &mdash; serta
+      <span class="mono">refunded_units</span> di <span class="mono">gold.product_daily</span>.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #2 yang disisipkan &mdash; partial refund</span>
+      <strong>1.943 order</strong> direfund sebagian saja (nilainya lebih kecil dari total sebelum refund),
+      dan hanya <strong>48 order</strong> direfund penuh. Karena data refund tidak menyediakan rincian per item,
+      <span class="mono">refunded_units</span> di Gold diestimasi proporsional:
+      <span class="mono">quantity &times; LEAST(1.0, refunded_amount / pre_refund_total)</span>.
+      Rasio dibatasi maksimum 1,0 agar unit yang direfund tidak mungkin melebihi unit yang terjual &mdash;
+      dan estimasi ini didokumentasikan terbuka, bukan disembunyikan.
+    </div>
+    <div class="catatan">
+      <span class="lbl">Dampak yang sudah terverifikasi</span>
+      Total refund terhitung: <strong>1.549.240,21</strong>. Rekonsiliasi
+      <span class="mono">refund_amount_vs_refund_events</span> berjalan (tidak lagi
+      <em>skipped</em>) dengan <strong>variance 0</strong>.
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- web_events -->
+  <div class="card avoid">
+    <div><span class="name">web_events.json</span><span class="rows">30.986 baris &rarr; 30.000 unik</span> <span class="badge b-ok">kini tersedia</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Log kunjungan pengunjung ke website/aplikasi &mdash; halaman dilihat, produk diklik, keranjang diisi.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu aktivitas pengunjung dalam satu sesi (kunci <span class="mono">event_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">event_id</td><td>text</td><td>Kunci unik event</td></tr>
+        <tr><td class="mono">event_type</td><td>text</td><td>PAGE_VIEW 10.345 &middot; PURCHASE 10.333 &middot; ADD_TO_CART 10.308</td></tr>
+        <tr><td class="mono">payload.session_id</td><td>text</td><td>ID sesi kunjungan &mdash; dipakai menghitung sesi unik</td></tr>
+        <tr><td class="mono">payload.customer_id</td><td>text</td><td>Pengunjung (kalau sudah login)</td></tr>
+        <tr><td class="mono">payload.channel</td><td>text</td><td>STORE &middot; WEB &middot; MOBILE_APP &middot; MARKETPLACE</td></tr>
+        <tr><td class="mono">payload.campaign_id</td><td>text</td><td>Campaign yang dikaitkan ke kunjungan itu (bisa NULL)</td></tr>
+        <tr><td class="mono">payload.order_id</td><td>text</td><td>Order yang jadi dari kunjungan itu (bisa NULL)</td></tr>
+      </tbody>
+    </table>
+<pre class="code">{"event_id": "EVT-00045845", "event_type": "ADD_TO_CART",
+ "occurred_at_utc": "2026-07-11T07:00:00Z", "ingested_at_utc": "2026-07-11T10:00:00Z",
+ "payload": {"campaign_id": null, "channel": "STORE", "customer_id": "CUST-00..."}}</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Satu-satunya sumber untuk <span class="mono">conversion_rate</span> di
+      <span class="mono">gold.channel_campaign_daily</span> (rumus: order &divide; sesi unik).
+      Terverifikasi: kolom <span class="mono">conversion_rate</span> kini terisi di
+      <strong>855 dari 855 baris</strong> &mdash; tidak ada lagi NULL.
+    </div>
+    <div class="sechead" style="margin-top:12px">
+      <h3 style="font-size:10.5pt">Sesi unik dan aktivitas per channel</h3>
+    </div>
+    <table class="t">
+      <thead><tr><th>Channel</th><th class="n">Sesi unik</th><th class="n">Event</th></tr></thead>
+      <tbody>
+        <tr><td>STORE</td><td class="n">2.517</td><td class="n">7.551</td></tr>
+        <tr><td>WEB</td><td class="n">2.507</td><td class="n">7.521</td></tr>
+        <tr><td>MOBILE_APP</td><td class="n">2.494</td><td class="n">7.482</td></tr>
+        <tr><td>MARKETPLACE</td><td class="n">2.482</td><td class="n">7.446</td></tr>
+        <tr class="tot"><td>Total</td><td class="n">10.000</td><td class="n">30.000</td></tr>
+      </tbody>
+    </table>
+    <div class="catatan">
+      <span class="lbl">Temuan menarik</span>
+      Channel STORE <strong>ikut tercatat</strong> di web_events (7.551 event, terbanyak). Awalnya mudah
+      disangka file ini hanya berisi aktivitas digital &mdash; ternyata tidak. Karena itu
+      <span class="mono">conversion_rate</span> terisi juga untuk baris campaign channel STORE,
+      walaupun <span class="mono">campaign_spend.csv</span> tidak punya campaign untuk STORE.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #1 yang disisipkan &mdash; event duplikat terbanyak</span>
+      30.986 baris berisi 30.000 <span class="mono">event_id</span> unik &mdash; <strong>986 event duplikat</strong>,
+      terbanyak di antara kelima file event. Penanganannya sama: ambil yang
+      <span class="mono">ingested_at_utc</span>-nya terbaru, sisanya dicatat di
+      <span class="mono">rejected_records</span>.
+    </div>
+  </div>
+</div>
+
+<!-- ============================= C · inventory ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>C &middot; inventory/</h2>
+    <div class="sub">1 file &middot; 35.040 baris</div>
+  </div>
+
+  <p>Satu-satunya file CSV di keluarga ini, dan baris terbanyak kedua setelah
+  <span class="mono">order_items</span>. Nilainya disimpan sebagai teks dan baru di-cast ke tipe
+  sebenarnya di Silver.</p>
+
+  <div class="card avoid">
+    <div><span class="name">inventory_snapshots.csv</span><span class="rows">35.040 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Cuplikan kondisi stok gudang/toko setiap hari &mdash; berapa unit tersedia dan berapa yang dipesan pelanggan tapi belum dikirim.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu produk di satu lokasi pada satu tanggal (kunci <span class="mono">product_id</span> + <span class="mono">location_id</span> + <span class="mono">snapshot_date</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">product_id</td><td>text</td><td>Produk yang distok</td></tr>
+        <tr><td class="mono">location_id</td><td>text</td><td>Lokasi: STORE-01 &hellip; STORE-05 (lima toko)</td></tr>
+        <tr><td class="mono">snapshot_date</td><td>date</td><td>Tanggal pencatatan. Rentang: 22 Jun &ndash; 19 Sep 2026</td></tr>
+        <tr><td class="mono">available_quantity</td><td>integer</td><td>Stok yang siap dijual</td></tr>
+        <tr><td class="mono">reserved_quantity</td><td>integer</td><td>Stok yang sudah dipesan, belum keluar</td></tr>
+        <tr><td class="mono">unit_cost</td><td>numeric</td><td>Harga pokok per unit (modal, bukan harga jual)</td></tr>
+      </tbody>
+    </table>
+<pre class="code">product_id,location_id,snapshot_date,available_quantity,reserved_quantity,unit_cost
+PROD-00001,STORE-01,2026-06-22,2,1,52.94</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Mengisi <span class="mono">available_inventory</span>, <span class="mono">reserved_inventory</span>, dan
+      <span class="mono">stockout_flag</span> di <span class="mono">gold.product_daily</span>.
+      <span class="mono">stockout_flag = true</span> artinya stok tersedia = 0 pada tanggal itu.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #9 yang disisipkan &mdash; snapshot yang hilang</span>
+      90 tanggal &times; 5 lokasi = <strong>450 pasangan</strong>, dan semuanya ada. Tapi kalau dihitung
+      lengkap: 80 produk &times; 450 pasangan = 36.000 baris seharusnya, sedangkan isinya hanya
+      35.040 &mdash; jadi ada <strong>960 baris yang hilang</strong>.
+      <br><br>
+      Penanganannya: kalau produk tidak punya baris pada tanggal tertentu,
+      <span class="mono">stockout_flag</span> diisi <strong>NULL</strong>, bukan <span class="mono">true</span>.
+      <em>"Tidak ada data" &ne; "stok habis"</em>. Kalau keduanya disamakan,
+      <span class="mono">stockout_rate</span> di laporan akan terlihat jauh lebih tinggi dari kenyataan.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #10 yang disisipkan &mdash; risiko penggandaan</span>
+      Tabel ini punya baris per lokasi. Kalau langsung di-join ke level item order, satu unit penjualan bisa
+      terhitung sebanyak 5 (jumlah lokasi). Gold menghindarinya dengan menjumlahkan stok per
+      produk-hari dulu di dalam CTE, baru join.
+    </div>
+  </div>
+</div>
+
+<!-- ============================= D · reference ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>D &middot; reference/</h2>
+    <div class="sub">2 file &middot; 863 baris &middot; pembanding &amp; biaya</div>
+  </div>
+
+  <div class="card avoid">
+    <div><span class="name">city_reference.json</span><span class="rows">8 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Daftar kota &mdash; kamus singkat yang menerjemahkan kode kota menjadi nama dan negara.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu kota (kunci <span class="mono">city_id</span>)</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">city_id</td><td>text</td><td>Kode kota: JKT, BDG, SBY, MDN, DPS, MKS, BPN, PLM</td></tr>
+        <tr><td class="mono">city_name</td><td>text</td><td>Nama kota</td></tr>
+        <tr><td class="mono">country</td><td>text</td><td>Negara &mdash; seluruhnya ID (Indonesia)</td></tr>
+      </tbody>
+    </table>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Mengubah kode kota pada pelanggan dan toko menjadi nama yang bisa dibaca. Delapan kota ini dipakai
+      bersama oleh <span class="mono">silver.customers</span> dan <span class="mono">silver.stores</span>.
+    </div>
+  </div>
+
+  <div class="card avoid">
+    <div><span class="name">campaign_spend.csv</span><span class="rows">855 baris</span></div>
+    <div class="kv">
+      <span class="k">Apa ini</span>
+      <span class="v">Catatan berapa uang yang dibelanjakan perusahaan untuk iklan, per hari per campaign per channel.</span>
+      <span class="k">Satu baris =</span>
+      <span class="v">Satu campaign pada satu channel pada satu tanggal</span>
+    </div>
+    <table class="t">
+      <thead><tr><th style="width:26%">Kolom</th><th style="width:14%">Tipe</th><th>Artinya</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">spend_date</td><td>date</td><td>Tanggal belanja. Rentang: 22 Jun &ndash; 19 Sep 2026</td></tr>
+        <tr><td class="mono">campaign_id</td><td>text</td><td>Sepuluh campaign: CMP-01 &hellip; CMP-10</td></tr>
+        <tr><td class="mono">channel</td><td>text</td><td>WEB, MOBILE_APP, MARKETPLACE &mdash; tidak termasuk STORE</td></tr>
+        <tr><td class="mono">spend_amount</td><td>numeric</td><td>Uang yang dikeluarkan hari itu</td></tr>
+      </tbody>
+    </table>
+<pre class="code">spend_date,campaign_id,channel,spend_amount
+2026-06-22,CMP-01,MOBILE_APP,104.82</pre>
+    <div class="tujuan">
+      <span class="lbl">Tujuan</span>
+      Penggaris utama di <span class="mono">gold.channel_campaign_daily</span> &mdash; menghasilkan
+      <strong>ROAS</strong> (net_revenue &divide; campaign_spend), yaitu berapa rupiah pendapatan yang dihasilkan
+      tiap 1 rupiah iklan. 855 baris spend &times; 855 baris Gold = tabel Gold yang grain-nya identik
+      dengan sumbernya.
+    </div>
+    <div class="masalah">
+      <span class="lbl">Masalah #10 yang disisipkan &mdash; tantangan atribusi</span>
+      File ini tidak mengatakan order mana yang datang dari campaign mana. Kalau setiap order di-join ke
+      semua campaign pada tanggal &amp; channel yang sama, revenue akan berlipat ganda.
+      Solusinya: <strong>atribusi round-robin</strong> &mdash; order dibagi bergantian ke campaign, sehingga
+      setiap order jatuh tepat ke satu campaign. Totalnya tetap sama:
+      <strong>7.483 = 7.483</strong> (variance 0).
+    </div>
+  </div>
+</div>
+
+<!-- ============================= PETA ALIRAN ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>2 &middot; Ke mana setiap tabel mengalir</h2>
+    <div class="sub">Bagian "Tujuan" di atas dirangkum dalam satu peta. Baca dari kiri ke kanan: file sumber &rarr; tabel Silver &rarr; tabel Gold yang memakainya.</div>
+  </div>
+
+  <table class="t">
+    <thead>
+      <tr><th>File sumber</th><th class="n">Baris</th><th>Tabel Silver</th><th>Aliran ke Gold</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="mono">customers.json</td><td class="n">2.500</td><td class="mono">silver.customers</td><td>customer_daily, executive_kpis_daily</td></tr>
+      <tr><td class="mono">customer_profiles.json</td><td class="n">2.777</td><td class="mono">silver.customer_profiles</td><td>&mdash; (siap, belum dipakai Gold)</td></tr>
+      <tr><td class="mono">customer_addresses.json</td><td class="n">2.500</td><td class="mono">silver.customer_addresses</td><td>&mdash; (siap, belum dipakai Gold)</td></tr>
+      <tr><td class="mono">products.json</td><td class="n">80</td><td class="mono">silver.products</td><td>product_daily</td></tr>
+      <tr><td class="mono">product_categories.json</td><td class="n">86</td><td class="mono">silver.product_categories</td><td>product_daily (kategori sesuai tanggal)</td></tr>
+      <tr><td class="mono">stores.json</td><td class="n">5</td><td class="mono">silver.stores</td><td>order_360 (store_id)</td></tr>
+      <tr><td class="mono">sales_channels.json</td><td class="n">4</td><td class="mono">silver.sales_channels</td><td>channel_campaign_daily</td></tr>
+      <tr><td class="mono">promotions.json</td><td class="n">12</td><td class="mono">silver.promotions</td><td>product_daily (promotion_count)</td></tr>
+      <tr><td class="mono">orders.json</td><td class="n">10.001</td><td class="mono">silver.orders</td><td>semua 5 tabel Gold</td></tr>
+      <tr><td class="mono">order_items.json</td><td class="n">24.960</td><td class="mono">silver.order_items</td><td>order_360, product_daily</td></tr>
+      <tr><td class="mono">order_promotions.json</td><td class="n">15.729</td><td class="mono">silver.order_promotions</td><td>order_360 (promotion_count)</td></tr>
+      <tr><td class="mono">payment_events.json</td><td class="n">22.582</td><td class="mono">silver.payment_events</td><td>order_360, executive_kpis_daily</td></tr>
+      <tr><td class="mono">refund_events.json</td><td class="n">4.121</td><td class="mono">silver.refund_events</td><td>order_360, product_daily</td></tr>
+      <tr><td class="mono">return_events.json</td><td class="n">3.553</td><td class="mono">silver.return_events</td><td>order_360 (return_status), customer_daily</td></tr>
+      <tr><td class="mono">support_events.json</td><td class="n">2.971</td><td class="mono">silver.support_events</td><td>customer_daily, executive_kpis_daily</td></tr>
+      <tr><td class="mono">web_events.json</td><td class="n">30.986</td><td class="mono">silver.web_events</td><td>channel_campaign_daily (conversion_rate)</td></tr>
+      <tr><td class="mono">inventory_snapshots.csv</td><td class="n">35.040</td><td class="mono">silver.inventory_snapshots</td><td>product_daily (stok &amp; stockout)</td></tr>
+      <tr><td class="mono">campaign_spend.csv</td><td class="n">855</td><td class="mono">silver.campaign_spend</td><td>channel_campaign_daily (ROAS)</td></tr>
+      <tr><td class="mono">city_reference.json</td><td class="n">8</td><td class="mono">silver.city_reference</td><td>&mdash; (referensi pelengkap)</td></tr>
+      <tr><td><em>(tabel buatan pipeline)</em></td><td class="n">2.010</td><td class="mono">silver.rejected_records</td><td>&mdash; (bukti audit penolakan)</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Hasil akhir tiap layer</h4>
+  <table class="t">
+    <thead><tr><th>Layer</th><th class="n">Tabel</th><th class="n">Baris</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Bronze</strong></td><td class="n">3</td><td class="n">158.770</td><td>Payload mentah, belum diubah</td></tr>
+      <tr><td><strong>Silver</strong></td><td class="n">20</td><td class="n">158.769</td><td>Bertipe &amp; tervalidasi (berkurang 1 karena dedup order)</td></tr>
+      <tr><td><strong>Gold</strong></td><td class="n">5</td><td class="n">27.710</td><td>Analitik siap pakai</td></tr>
+      <tr><td><strong>Ops</strong></td><td class="n">4</td><td class="n">&mdash;</td><td>Log pipeline, quality check, rekonsiliasi</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================= 10 MASALAH ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>3 &middot; Sepuluh masalah yang sengaja disisipkan</h2>
+    <div class="sub">Sesuai README bagian 1. Setiap masalah muncul di satu tabel dan diuji oleh satu pemeriksaan.</div>
+  </div>
+
+  <p>Ini peta untuk berdiskusi saat ditanya <em>"masalah apa yang ada di dataset ini?"</em>. Urutannya
+  mengikuti README.</p>
+
+  <table class="t">
+    <thead>
+      <tr><th class="n">#</th><th>Masalah</th><th>Ada di</th><th>Penanganan</th><th class="n">Bukti</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="n">1</td><td>Duplikat order</td><td class="mono">orders.json</td>
+        <td><span class="mono">ROW_NUMBER()</span> ambil versi terbaru + tanda <span class="mono">had_duplicate</span></td>
+        <td class="n">1 baris</td>
+      </tr>
+      <tr>
+        <td class="n">1</td><td>Duplikat event</td><td class="mono">5 file events</td>
+        <td><span class="mono">DISTINCT ON (event_id)</span> + dicatat <span class="mono">DUPLICATE_EVENT_DROPPED</span></td>
+        <td class="n">2.006 baris</td>
+      </tr>
+      <tr>
+        <td class="n">2</td><td>Split payment</td><td class="mono">payment_events.json</td>
+        <td><span class="mono">SUM(...) FILTER (WHERE status IN (...))</span> &mdash; jumlahkan potongannya</td>
+        <td class="n">1.915 order</td>
+      </tr>
+      <tr>
+        <td class="n">2</td><td>Partial refund</td><td class="mono">refund_events.json</td>
+        <td>Estimasi proporsional <span class="mono">LEAST(1.0, refunded / pre_refund_total)</span></td>
+        <td class="n">1.943 order</td>
+      </tr>
+      <tr>
+        <td class="n">3</td><td>Event terlambat</td><td class="mono">5 file events</td>
+        <td>Tandai <span class="mono">is_late = true</span> &mdash; tetap dipakai, tidak dibuang</td>
+        <td class="n">3.659 event</td>
+      </tr>
+      <tr>
+        <td class="n">3</td><td>Urutan event tak kronologis</td><td class="mono">return_events.json</td>
+        <td>Ambil <strong>tahap tertinggi</strong> (<span class="mono">MAX</span>), bukan event terakhir</td>
+        <td class="n">3 tahap</td>
+      </tr>
+      <tr>
+        <td class="n">4</td><td>Timezone berbeda</td><td class="mono">5 file events</td>
+        <td>Cast ke <span class="mono">timestamptz</span> + tanggal bisnis pakai <span class="mono">AT TIME ZONE 'UTC'</span></td>
+        <td class="n">5.837 event</td>
+      </tr>
+      <tr>
+        <td class="n">5</td><td>Referensi produk putus</td><td class="mono">order_items.json</td>
+        <td>Ditolak + dicatat <span class="mono">BROKEN_PRODUCT_REFERENCE</span></td>
+        <td class="n">3 baris</td>
+      </tr>
+      <tr>
+        <td class="n">5</td><td>Referensi order putus</td><td class="mono">order_items.json</td>
+        <td>Ditolak + dicatat <span class="mono">BROKEN_ORDER_REFERENCE</span></td>
+        <td class="n">0 baris</td>
+      </tr>
+      <tr>
+        <td class="n">6</td><td>Quantity negatif/nol</td><td class="mono">order_items.json</td>
+        <td>Ditolak + dicatat <span class="mono">NEGATIVE_OR_ZERO_QUANTITY</span></td>
+        <td class="n">1 baris</td>
+      </tr>
+      <tr>
+        <td class="n">7</td><td>Profil pelanggan berubah</td><td class="mono">customer_profiles.json</td>
+        <td>SCD Type-2: <span class="mono">valid_from</span> / <span class="mono">valid_to</span> / <span class="mono">is_current</span></td>
+        <td class="n">277 versi</td>
+      </tr>
+      <tr>
+        <td class="n">7</td><td>Kategori produk berubah</td><td class="mono">product_categories.json</td>
+        <td>Pilih kategori yang berlaku pada tanggal transaksi, bukan terbaru</td>
+        <td class="n">6 versi</td>
+      </tr>
+      <tr>
+        <td class="n">8</td><td>Order batal tapi payment captured</td><td class="mono">orders + payment_events</td>
+        <td><span class="mono">payment_status = 'refunded'</span> menang atas <span class="mono">'captured'</span></td>
+        <td class="n">0 kasus</td>
+      </tr>
+      <tr>
+        <td class="n">9</td><td>Inventory snapshot hilang</td><td class="mono">inventory_snapshots.csv</td>
+        <td><span class="mono">stockout_flag</span> = NULL (bukan TRUE) &mdash; "tak ada data" &ne; "habis"</td>
+        <td class="n">960 baris</td>
+      </tr>
+      <tr>
+        <td class="n">10</td><td>Promotion menggandakan fact</td><td class="mono">promotions + order_promotions</td>
+        <td>Subquery <span class="mono">COUNT(*)</span>, bukan join langsung</td>
+        <td class="n">12 promosi</td>
+      </tr>
+      <tr>
+        <td class="n">10</td><td>Campaign menggandakan fact</td><td class="mono">campaign_spend.csv</td>
+        <td>Atribusi round-robin: satu order = satu campaign</td>
+        <td class="n">7.483 = 7.483</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="masalah">
+    <span class="lbl">Satu-satunya yang belum punya bukti angka &mdash; #8</span>
+    Kode penanganannya lengkap, tapi pada dataset ini <strong>tidak ada satu pun</strong> order
+    <span class="mono">cancelled</span> yang payment-nya sudah <span class="mono">captured</span>
+    (0 dari 1.215). Jadi masalah ini disiapkan, tapi datanya belum memicunya &mdash; dan belum ada
+    quality check khusus yang menargetkannya. Ini jujur perlu disebut kalau ditanya.
+  </div>
+</div>
+
+<!-- ============================= PENUTUP ============================= -->
+<div class="page">
+  <div class="sechead">
+    <h2>4 &middot; Ringkasan angka terverifikasi</h2>
+    <div class="sub">Semua nilai di bawah diambil langsung dari database pada run terakhir.</div>
+  </div>
+
+  <table class="t">
+    <thead><tr><th>Metrik</th><th class="n">Nilai</th><th>Sumber</th></tr></thead>
+    <tbody>
+      <tr><td>Total baris mentah</td><td class="n">158.770</td><td>Bronze, 19 file</td></tr>
+      <tr><td>Total baris Silver</td><td class="n">158.769</td><td>20 tabel</td></tr>
+      <tr><td>Total baris Gold</td><td class="n">27.710</td><td>5 tabel kontrak</td></tr>
+      <tr><td>Baris ditolak</td><td class="n">2.010</td><td><span class="mono">silver.rejected_records</span></td></tr>
+      <tr><td>Gross merchandise value</td><td class="n">15.100.182,54</td><td><span class="mono">gold.order_360</span></td></tr>
+      <tr><td>Net revenue</td><td class="n">13.558.674,83</td><td><span class="mono">gold.order_360</span></td></tr>
+      <tr><td>Dana tertagih</td><td class="n">13.137.988,14</td><td><span class="mono">captured_payment_amount</span></td></tr>
+      <tr><td>Total refund</td><td class="n">1.549.240,21</td><td><span class="mono">refunded_amount</span></td></tr>
+      <tr><td>Item terjual</td><td class="n">24.956</td><td><span class="mono">SUM(item_count)</span></td></tr>
+      <tr><td>Unit terjual</td><td class="n">62.379</td><td><span class="mono">SUM(unit_quantity)</span></td></tr>
+      <tr><td>Order teratribusi campaign</td><td class="n">7.483</td><td><span class="mono">channel_campaign_daily</span></td></tr>
+      <tr><td>Event terlambat</td><td class="n">3.659</td><td><span class="mono">is_late = true</span></td></tr>
+      <tr><td>Event duplikat dibuang</td><td class="n">2.006</td><td>5 file events</td></tr>
+      <tr><td>Grain violation (Gold)</td><td class="n">0</td><td>5 pemeriksaan grain</td></tr>
+      <tr><td>Rekonsiliasi variance</td><td class="n">0</td><td>11 rekonsiliasi, semua cocok</td></tr>
+    </tbody>
+  </table>
+
+  <div class="catatan">
+    <span class="lbl">Catatan penutup</span>
+    Seluruh isi dokumen ini diambil langsung dari file dataset dan schema pipeline yang ada di proyek.
+    Angka baris adalah angka terverifikasi dari run terakhir. Keempat file yang sebelumnya bertanda
+    <em>BELUM TERSEDIA</em> kini sudah tersedia, dan pipeline sudah mengisinya otomatis tanpa perubahan kode
+    &mdash; termasuk menghidupkan kembali <span class="mono">conversion_rate</span>,
+    <span class="mono">captured_payment_amount</span>, <span class="mono">refunded_amount</span>, dan
+    <span class="mono">promotion_count</span> yang sebelumnya memakai nilai cadangan.
+  </div>
+
+  <div class="foot">
+    Dokumen belajar pribadi &middot; Milestone 1 Omnichannel Retail NL-to-SQL Analytics<br>
+    Dibuat untuk keperluan pribadi, bukan bagian dari berkas submission.
+  </div>
+</div>
+
+</body>
+</html>
