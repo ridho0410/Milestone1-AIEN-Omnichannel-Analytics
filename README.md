@@ -1,317 +1,353 @@
-# Milestone P1M1 — Omnichannel Retail NL-to-SQL Analytics
+# Panduan Setup — Omnichannel Retail NL-to-SQL Analytics
 
-## 1. Skenario
+Panduan menjalankan proyek di Windows melalui terminal PowerShell VS Code: PostgreSQL lokal → pipeline Airflow → Gold → API FastAPI → UI Streamlit. Panduan ini melengkapi `README.md` yang berisi instruksi milestone.
 
-Anda bekerja sebagai Data Engineer di perusahaan retail omnichannel. Perusahaan
-menjual produk melalui beberapa channel, memiliki toko fisik dan channel
-digital, menjalankan campaign marketing, serta menerima pembayaran, refund,
-return, dan permintaan bantuan pelanggan.
+Disusun dari kode dan konfigurasi proyek pada 7 November 2026. Semua perintah dijalankan dari folder utama proyek, kecuali disebutkan lain.
 
-Data perusahaan tidak berasal dari satu sistem yang rapi. Anda akan menerima
-data dari beberapa sumber berikut:
+## 1. Persiapan
 
-- Data operasional customer, order, product, store, promotion, dan channel.
-- Event payment, refund, return, customer support, serta aktivitas web/mobile.
-- Snapshot inventory harian.
-- Data pengeluaran dan atribusi campaign.
+Siapkan:
 
-Data mentah tersedia melalui Google Drive yang berperan sebagai data lake.
-Gunakan link berikut saat dataset dibagikan:
+- VS Code, dengan folder proyek dibuka melalui **File → Open Folder**.
+- UV untuk mengelola Python dan dependensi.
+- Python 3.11, sesuai `.python-version`; `pyproject.toml` mensyaratkan Python >=3.11.
+- Docker Desktop yang sudah berjalan untuk PostgreSQL dan Airflow.
+- Dataset di `data/raw/`.
+- Koneksi internet saat pertama mengunduh dependensi dan image Docker. API key hanya diperlukan jika memakai provider LLM.
 
-```text
-https://drive.google.com/drive/folders/1pJrx8eUprI1Z_CJeQDNbRbelrFzlIshy?usp=sharing
+Buka **Terminal → New Terminal**, pilih PowerShell, kemudian:
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\bahar\OneDrive\Documents\AI HACKIV8\Milestone1-omnichannel_retail-main'
+uv --version
+docker --version
+docker compose version
 ```
 
-Dataset sengaja memiliki masalah yang umum dijumpai dalam sistem produksi:
+Jika UV belum tersedia, instal melalui petunjuk resmi [UV](https://docs.astral.sh/uv/getting-started/installation/), lalu buka ulang terminal. Jika Python 3.11 belum tersedia melalui UV:
 
-- Duplicate order dan duplicate event.
-- Split payment dan partial refund.
-- Event terlambat dan timestamp yang tidak berurutan.
-- Timestamp dengan timezone berbeda.
-- Missing reference ke customer, product, atau order.
-- Negative quantity.
-- Perubahan profil customer dan kategori product.
-- Order yang dibatalkan tetapi payment-nya sudah captured.
-- Inventory snapshot yang hilang.
-- Banyak promotion dan campaign yang berpotensi menggandakan fact.
-
-Di sisi lain, perusahaan sudah memiliki NL-to-SQL engine dan UI. Engine hanya
-dapat membaca tabel `gold.*`. Jika Bronze, Silver, dan Gold dibangun dengan
-tidak tepat, engine dapat menghasilkan analisis yang tampak benar tetapi
-sebenarnya salah.
-
-## 2. Tujuan Milestone
-
-Tujuan Anda adalah membangun pipeline data lokal dari data lake sampai ke
-analytical Gold layer PostgreSQL:
-
-```text
-Google Drive data lake
-        ↓
-Raw files lokal
-        ↓
-Bronze PostgreSQL
-        ↓
-Silver PostgreSQL
-        ↓
-Gold PostgreSQL
-        ↓
-NL-to-SQL engine
-        ↓
-Analisis dan visualisasi melalui UI
+```powershell
+uv python install 3.11
 ```
 
-Anda harus:
+Port yang dipakai konfigurasi proyek:
 
-1. Mengunduh dan memvalidasi raw data dari Google Drive.
-2. Mempertahankan source evidence ke Bronze tanpa mengubah payload asli.
-3. Mendesain Silver sebagai tabel typed, normalized, tervalidasi, dan memiliki
-   lineage.
-4. Membangun Gold dengan schema, grain, dan definisi metric yang sudah tetap.
-5. Menambahkan quality checks dan reconciliation yang membuktikan hasil
-   pipeline dapat dipercaya.
-6. Menjalankan pertanyaan analitik menggunakan engine yang telah disediakan.
+| Komponen | Alamat dari Windows |
+|---|---|
+| PostgreSQL | `localhost:5432` |
+| Airflow | `http://localhost:8080` |
+| API | `http://localhost:8000` |
+| Dokumentasi API | `http://localhost:8000/docs` |
+| Streamlit | `http://localhost:8501` |
 
-Anda tidak perlu membangun ulang LLM, NL-to-SQL engine, UI, Neon database,
-atau generator data. Komponen tersebut disediakan sebagai consumer dan alat
-verifikasi untuk pipeline Anda.
+## 2. Instal dependensi Python
 
-## 3. Sasaran Pembelajaran
+```powershell
+uv sync --frozen
+uv run python --version
+```
 
-Setelah menyelesaikan milestone ini, Anda diharapkan dapat:
+`uv sync --frozen` memakai `uv.lock` yang sudah tersedia. Di VS Code, tekan **Ctrl+Shift+P → Python: Select Interpreter**, lalu pilih `.venv\Scripts\python.exe` jika ekstensi Python terpasang.
 
-- Mendesain pipeline multi-source dari data lake ke PostgreSQL.
-- Memisahkan source preservation, normalization, dan analytical modeling.
-- Menangani deduplication secara deterministik.
-- Merekonstruksi state dari event payment, refund, return, dan support.
-- Memilih versi customer atau product berdasarkan waktu transaksi.
-- Menggabungkan inventory dan campaign tanpa menggandakan fakta.
-- Menangani record invalid dan missing reference secara eksplisit.
-- Menjaga grain Gold table tetap konsisten.
-- Membuat quality checks untuk uniqueness, reconciliation, dan business rules.
-- Menjelaskan trade-off dan keputusan desain pipeline.
+Tidak perlu mengaktifkan virtual environment secara manual jika semua perintah memakai `uv run`. Airflow dijalankan melalui image Docker tersendiri; Airflow tidak tercantum dalam dependensi UV proyek.
 
-## 4. Kontrak Gold Layer
+## 3. Atur `.env` untuk mode lokal
 
-Gold schema tersedia di `database/schemas/gold.sql`. Jangan mengganti nama
-tabel, nama kolom, grain, tipe data, atau arti metric karena schema ini juga
-digunakan oleh Neon demo, NL-to-SQL engine, dan benchmark.
+File `.env` sudah ada pada folder yang diperiksa. Pertahankan nilai rahasia yang masih diperlukan; jangan menimpanya dengan `.env.example`. Pada salinan proyek yang belum mempunyai `.env`, buat dengan:
 
-| Tabel | Grain | Isi utama |
-|---|---|---|
-| `gold.order_360` | Satu baris per order | Nilai order, discount, payment, refund, return, promotion, dan status order |
-| `gold.customer_daily` | Satu customer per tanggal | Order, unit, revenue, refund, return, support, dan status customer |
-| `gold.product_daily` | Satu product per tanggal | Penjualan, revenue, refund unit, inventory, category, dan stockout |
-| `gold.channel_campaign_daily` | Satu tanggal, channel, dan campaign | Spend, attributed order/customer, revenue, refund, ROAS, dan conversion |
-| `gold.executive_kpis_daily` | Satu tanggal bisnis | Total order, revenue, AOV, refund rate, return rate, repeat rate, stockout rate, dan active customer |
+```powershell
+if (-not (Test-Path -LiteralPath '.env')) {
+    Copy-Item -LiteralPath '.env.example' -Destination '.env'
+}
+```
 
-Contoh aturan yang harus konsisten:
+Buka `.env` di VS Code dan pastikan pengaturan berikut ada, masing-masing hanya satu kali:
 
-- `net_revenue = gross_merchandise_value - discount_amount + shipping_revenue - refunded_amount`.
-- `refund_rate` membandingkan order yang memiliki refund selesai dengan order
-  yang payment-nya captured.
-- `return_rate` menghitung order yang memiliki return event dibandingkan
-  dengan resolved order.
-- `roas` menghitung attributed net revenue dibagi campaign spend.
-- Setiap Gold table harus memiliki grain sesuai kontrak dan tidak boleh
-  mengalami fact multiplication.
+```dotenv
+ANALYTICS_DB_TARGET=local
+LOCAL_DATABASE_URL=postgresql://retail:retail@localhost:5432/retail_analytics
+NL2SQL_PROVIDER=mock
+NL2SQL_MAX_ROWS=100
+ENGINE_URL=http://localhost:8000
+```
 
-## 5. Pembagian Tanggung Jawab
+Nilai `retail` di atas adalah kredensial database latihan dari `docker-compose.yml`, bukan kredensial Neon. Jangan menyalin API key atau URL database pribadi ke dokumentasi, screenshot, atau GitHub. `.env` sudah tercantum di `.gitignore`.
 
-### Yang harus Anda bangun
+Perbedaan konfigurasi yang perlu diketahui:
 
-- `database/schemas/bronze.sql`
-- `database/schemas/silver.sql`
-- `database/schemas/ops.sql`
-- `pipelines/bronze/build_bronze.py`
-- `pipelines/silver/build_silver.py`
-- `pipelines/gold/build_gold.py`
-- Quality checks dan reconciliation queries.
-- Dokumentasi keputusan transformasi.
+- `ANALYTICS_DB_TARGET` menentukan database yang dibaca engine: `local` atau `neon`.
+- Pipeline dibatasi ke target `local`, terlepas dari target engine.
+- `LOCAL_DATABASE_URL` untuk proses Python di Windows memakai `localhost`.
+- Airflow di dalam container memakai `host.docker.internal`; nilainya sudah diatur dalam `airflow-docker/docker-compose.yml`.
+- Environment variable pada terminal atau container lebih diprioritaskan daripada `.env`. Setelah mengganti konfigurasi, periksa override pada terminal dan restart API/UI.
 
-### Yang sudah disediakan
+## 4. Jalankan PostgreSQL lokal
 
-- Gold contract di `database/schemas/gold.sql`.
-- NL-to-SQL engine dan schema catalog.
-- ChatGPT-style UI.
-- Test harness dan benchmark.
-- Data generator untuk kebutuhan instructor.
-- Neon demo Gold-only dengan sample data.
+```powershell
+docker compose up -d postgres
+docker compose ps postgres
+docker compose exec postgres pg_isready -U retail -d retail_analytics
+```
 
-## 6. Data Lake Google Drive
+Tunggu sampai PostgreSQL sehat dan `pg_isready` melaporkan menerima koneksi. Jika gagal, lihat:
 
-Download seluruh isi folder Google Drive ke `data/raw/`. Struktur lokal harus
-menjadi:
+```powershell
+docker compose logs --tail 100 postgres
+```
+
+Panduan utama menjalankan API/UI dengan UV. Karena itu, cukup nyalakan service `postgres` di tahap ini. Jika API/UI container dari percobaan sebelumnya masih berjalan dan menggunakan port yang sama:
+
+```powershell
+docker compose stop nl2sql-api analytics-ui
+```
+
+## 5. Siapkan dataset
+
+Struktur yang diharapkan:
 
 ```text
 data/raw/
 ├── manifest.json
-├── operational/
-│   ├── customers.json
-│   ├── customer_profiles.json
-│   ├── customer_addresses.json
-│   ├── products.json
-│   ├── product_categories.json
-│   ├── stores.json
-│   ├── sales_channels.json
-│   ├── promotions.json
-│   ├── orders.json
-│   ├── order_items.json
-│   └── order_promotions.json
-├── events/
-│   ├── payment_events.json
-│   ├── refund_events.json
-│   ├── return_events.json
-│   ├── support_events.json
-│   └── web_events.json
-├── inventory/
-│   └── inventory_snapshots.csv
-└── reference/
-    ├── campaign_spend.csv
-    └── city_reference.json
+├── operational/   # 11 file JSON
+├── events/        # 5 file JSON
+├── inventory/     # inventory_snapshots.csv
+└── reference/     # campaign_spend.csv dan city_reference.json
 ```
 
-## 7. Arsitektur Pipeline
+Daftar lengkap file dan sumber dataset ada pada bagian **Data Lake Google Drive** di `README.md`; daftar yang diperiksa kode ada di `pipelines/ingestion/files.py`.
 
-### Bronze
+Saat panduan dibuat, 19 file sumber sudah ditemukan dan tidak ada sumber yang hilang, tetapi `data/raw/manifest.json` belum tersedia. Kode saat ini memperlakukan manifest sebagai opsional; tanpa manifest, checksum tidak dapat dibandingkan dengan manifest sumber. Untuk memenuhi dokumentasi dataset pada tugas, sertakan manifest asli jika tersedia. Jangan membuat checksum pembanding sendiri lalu menganggapnya sebagai bukti kecocokan dengan sumber.
 
-Bronze menyimpan source evidence yang immutable. Payload asli disimpan dalam
-bentuk `JSONB` atau representasi setara, bersama nama file, nomor baris, source
-record identifier, checksum, dan ingestion run.
+Setelah mengekstrak dataset, pastikan tidak ada folder bertingkat seperti `data/raw/nama-dataset/operational/`.
 
-Bronze tidak boleh melakukan business join, deduplication, atau kalkulasi
-metric. Record invalid dan duplicate tetap dipertahankan di layer ini.
-
-### Silver
-
-Silver mengubah payload menjadi tabel bertipe dan ter-normalisasi. Terapkan:
-
-- Timestamp normalization ke UTC.
-- Deduplication dengan deterministic key.
-- Validasi foreign reference.
-- Status normalization.
-- Rejection untuk quantity negatif atau record invalid.
-- Event identity resolution.
-- Temporal version selection.
-- Lineage ke Bronze.
-- Penanganan late-arriving records.
-
-Record yang ditolak harus memiliki alasan di `silver.rejected_records` atau
-mekanisme setara yang terdokumentasi.
-
-### Gold
-
-Gold membaca Silver, bukan file mentah secara langsung. Bangun fact dan
-aggregate secara terpisah sebelum melakukan join ke promotion, campaign,
-inventory, atau event agar tidak terjadi penggandaan nilai.
-
-## 8. Orkestrasi dengan Airflow
-
-Pipeline wajib diorkestrasi menggunakan Airflow. Buat DAG pada file
-`dags/dag.py`; file ini menjadi entrypoint utama untuk menjalankan pipeline
-Anda. Jangan menjadikan perintah CLI manual sebagai pengganti DAG.
-
-DAG minimal harus memiliki tahapan berikut dengan dependency yang jelas:
-
-```text
-validate manifest dan raw files
-            ↓
-initialize PostgreSQL schemas
-            ↓
-load Bronze
-            ↓
-build Silver
-            ↓
-quality gate
-            ↓
-build Gold
-            ↓
-validate Gold dan record pipeline metadata
-```
-
-DAG harus:
-
-- Dapat dijalankan ulang tanpa menggandakan data.
-- Mengirim `pipeline_run_id` ke setiap layer.
-- Menghentikan tahap berikutnya jika quality gate gagal.
-- Menyimpan status dan error pipeline pada schema `ops`.
-- Menggunakan PostgreSQL lokal sebagai target pipeline.
-- Tidak mengunggah Bronze atau Silver ke Neon.
-
-Anda tetap boleh membuat modul Python atau SQL tambahan, tetapi seluruh
-pipeline harus dapat ditelusuri dari `dags/dag.py`.
-
-## 9. Menjalankan Agent dengan UV
-
-Untuk menjalankan NL-to-SQL agent dan ChatGPT-style UI, UV sudah cukup.
-Docker Compose tidak diperlukan jika agent menggunakan Gold sample di Neon.
-
-### Mode Neon demo
-
-Pastikan `.env` lokal berisi koneksi Neon dan OpenAI API key. File ini hanya
-untuk komputer Anda dan tidak boleh di-upload ke GitHub. Jalankan konfigurasi
-berikut di terminal PowerShell pertama:
+## 6. Inisialisasi schema sebelum menjalankan DAG
 
 ```powershell
-uv sync
-uv run python -m uvicorn engine.api.main:app --port 8000
+uv run python -m pipelines.ingestion.initialize_database --target local
 ```
 
-Pada terminal kedua, jalankan UI:
+Perintah ini menerapkan `bronze.sql`, `silver.sql`, `gold.sql`, dan `ops.sql`. Inisialisasi pertama wajib dilakukan sebelum trigger DAG: task `validate_raw_files` langsung memanggil `start_run()` yang menulis ke `ops.pipeline_runs`, sedangkan task `initialize_schemas` baru berada setelahnya.
+
+Periksa schema:
 
 ```powershell
-uv run python -m streamlit run ui/app.py --server.port 8501
+docker compose exec postgres psql -U retail -d retail_analytics -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name IN ('bronze','silver','gold','ops') ORDER BY schema_name;"
 ```
 
-Buka `http://localhost:8501`. UI berkomunikasi dengan agent melalui API dan
-tidak mengakses database atau OpenAI secara langsung.
+Keempat schema harus muncul. Gold masih dapat kosong sebelum pipeline berhasil.
 
-## 10. File yang Wajib Diunggah ke GitHub
+## 7. Jalankan Airflow dan pipeline
 
-Submission hanya perlu berisi artefak implementasi berikut:
+Dari folder utama proyek:
+
+```powershell
+docker compose -f airflow-docker/docker-compose.yml up -d --build
+docker compose -f airflow-docker/docker-compose.yml ps
+docker compose -f airflow-docker/docker-compose.yml logs --tail 100 airflow
+```
+
+Airflow menggunakan image dasar `apache/airflow:2.10.5` dengan mode `standalone`. Buka `http://localhost:8080`. Gunakan kredensial admin yang ditampilkan pada log startup Airflow di atas, sesuai [panduan resmi Airflow 2.10.5](https://airflow.apache.org/docs/apache-airflow/2.10.5/start.html). Jangan bagikan output yang memuat password. Jika akun pernah diubah, gunakan kredensial yang berlaku pada volume Airflow tersebut.
+
+Di dashboard:
+
+1. Cari DAG `retail_omnichannel_pipeline`.
+2. Aktifkan DAG jika masih paused.
+3. Pilih **Trigger DAG** untuk menjalankan pipeline.
+4. Buka tampilan Graph/Grid dan periksa urutan task:
 
 ```text
-submission/
-├── dags/
-│   └── dag.py
-├── database/schemas/
-│   ├── bronze.sql
-│   ├── silver.sql
-│   └── ops.sql
-├── pipelines/
-│   ├── bronze/build_bronze.py
-│   ├── silver/build_silver.py
-│   └── gold/build_gold.py
-└── evidence/
-    ├── airflow_run.png
-    └── sample_engine_queries.md
+validate_raw_files
+  → initialize_schemas
+  → load_bronze
+  → build_silver
+  → quality_gate_pre_gold
+  → build_gold
+  → validate_gold
 ```
 
-`database/schemas/gold.sql` tidak perlu dikumpulkan ulang karena merupakan
-schema contract yang sudah diberikan. File berikut juga tidak perlu dikirim:
+Run berhasil jika seluruh task berstatus **success**. Jika gagal, buka log task pertama yang gagal; task berikutnya dapat berhenti karena dependency atau quality gate. DAG memiliki satu retry dengan jeda dua menit.
 
-- `.env` atau `.env.example`.
-- `pyproject.toml` atau `requirements.txt`.
-- Folder `tests/`.
-- `data_contract_notes.md`.
-- `architecture.md`.
-- `README.md` atau README tambahan.
-- Dataset penuh, `.venv`, cache, dan folder `solution/`.
+Kode DAG saat ini memakai cron `0 0 * * *` pada Airflow 2.10.5, yaitu pukul 00.00 menurut timezone Airflow yang digunakan. Mengaktifkan DAG juga mengaktifkan jadwal tersebut; pause kembali setelah demo jika tidak ingin run terjadwal. `catchup=False` dan `max_active_runs=1`.
 
-Jangan upload API key atau password database dalam bentuk apa pun.
+**Perilaku saat dijalankan ulang:** Bronze mengganti record untuk setiap file sumber yang dimuat; SQL Silver dan Gold menghapus lalu membangun kembali isi tabelnya. Gunakan database latihan yang memang menjadi target pipeline, karena hasil sebelumnya dapat diganti. Implementasi ini tidak menyimpan semua versi historis Bronze secara append-only.
 
-## 10. Rubrik Penilaian
+### Pemeriksaan hasil
 
-| Komponen | Bobot | Indikator |
-|---|---:|---|
-| Bronze ingestion dan source preservation | 15% | Semua input dipertahankan, lineage jelas, append-only/idempotent, manifest tervalidasi |
-| Silver normalization dan quality handling | 25% | Tipe data, UTC, deduplication, referential checks, rejection, dan temporal logic benar |
-| Gold transformation dan grain | 30% | Lima tabel terisi, grain benar, metric benar, tidak ada fact multiplication |
-| Reconciliation dan quality gate | 15% | Pipeline mendeteksi duplikasi, revenue mismatch, refund mismatch, dan broken transformation |
-| Airflow orchestration dan reproducibility | 15% | DAG memiliki dependency yang benar, rerunnable, memiliki failure handling, dan mencatat metadata |
-| **Total** | **100%** | |
+```powershell
+docker compose exec postgres psql -U retail -d retail_analytics -c "SELECT pipeline_run_id, status, started_at_utc, finished_at_utc, error_message FROM ops.pipeline_runs ORDER BY started_at_utc DESC LIMIT 5;"
+docker compose exec postgres psql -U retail -d retail_analytics -c "SELECT 'order_360' AS table_name, COUNT(*) FROM gold.order_360 UNION ALL SELECT 'customer_daily', COUNT(*) FROM gold.customer_daily UNION ALL SELECT 'product_daily', COUNT(*) FROM gold.product_daily UNION ALL SELECT 'channel_campaign_daily', COUNT(*) FROM gold.channel_campaign_daily UNION ALL SELECT 'executive_kpis_daily', COUNT(*) FROM gold.executive_kpis_daily;"
+```
 
+Periksa run terbaru berstatus `success` dan kelima tabel Gold berisi hasil sesuai dataset. Jangan memakai jumlah baris tertentu sebagai patokan tanpa mencocokkannya dengan dataset yang dimuat.
 
-> **Catatan:** Neon hanya berisi sample Gold untuk demo instructor. Pipeline
-> peserta harus berjalan di PostgreSQL lokal dan tidak meng-upload Bronze atau
-> Silver ke Neon.
+### Menjalankan manual untuk diagnosis
+
+Jika perlu memeriksa pipeline tanpa dashboard Airflow:
+
+```powershell
+uv run python -m pipelines.run_pipeline --input data/raw --target local
+```
+
+CLI mencatat run dan menjalankan tahapan pipeline, tetapi untuk milestone, orkestrasi dan bukti eksekusi tetap melalui DAG. Jangan menjalankan CLI dan DAG bersamaan karena keduanya menulis ulang tabel yang sama.
+
+## 8. Jalankan API dan UI
+
+Buka terminal PowerShell pertama dari folder utama proyek:
+
+```powershell
+$env:ANALYTICS_DB_TARGET = 'local'
+$env:NL2SQL_PROVIDER = 'mock'
+uv run python -m uvicorn engine.api.main:app --host 127.0.0.1 --port 8000
+```
+
+Biarkan terminal ini berjalan. Buka terminal kedua, masuk ke folder proyek yang sama, lalu:
+
+```powershell
+$env:ENGINE_URL = 'http://localhost:8000'
+uv run python -m streamlit run ui/app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Buka `http://localhost:8501`. UI memanggil API; UI tidak menjalankan pipeline atau membuat tabel Gold.
+
+Pada terminal ketiga, periksa API:
+
+```powershell
+Invoke-RestMethod -Uri 'http://localhost:8000/health'
+```
+
+Respons yang diharapkan untuk mode ini adalah `status=ok` dan `provider=MockProvider`. Endpoint `/health` hanya memeriksa aplikasi API; respons sehat belum membuktikan database terhubung atau Gold terisi.
+
+Uji query yang benar-benar membaca Gold:
+
+```powershell
+$body = @{
+    question = 'What is total net revenue by sales channel?'
+    max_rows = 100
+    visualization = 'auto'
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:8000/v1/analyze' -Method Post -ContentType 'application/json' -Body $body
+```
+
+Gunakan pertanyaan yang sama di UI. Contoh lain yang didukung mode mock:
+
+- `How many orders were placed each day?`
+- `Which campaigns had the best ROAS?`
+- `What was the daily net revenue?`
+
+Mode `mock` tidak membutuhkan API key, tetapi tetap membutuhkan database dengan tabel Gold. Pertanyaannya harus cocok dengan daftar dalam `engine/llm/providers.py`; kode menormalkan kapitalisasi dan spasi, tetapi tidak menerjemahkan pertanyaan bebas.
+
+## 9. Opsional: provider LLM untuk pertanyaan bebas
+
+Jika ingin memakai adapter LLM yang tersedia pada proyek, atur `.env`:
+
+```dotenv
+NL2SQL_PROVIDER=openai
+OPENAI_API_KEY=ISI_API_KEY_ANDA
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Nama model di atas mengikuti default proyek, bukan hasil pengujian akses model pada akun Anda. Gunakan model yang tersedia pada akun/provider dan kompatibel dengan adapter proyek. Adapter mengirim request ke endpoint `/chat/completions`.
+
+Hentikan API dengan **Ctrl+C**, lalu pada terminal API yang sebelumnya mengatur mode mock:
+
+```powershell
+$env:NL2SQL_PROVIDER = 'openai'
+uv run python -m uvicorn engine.api.main:app --host 127.0.0.1 --port 8000
+```
+
+Ini diperlukan karena `$env:NL2SQL_PROVIDER='mock'` pada terminal mengalahkan isi `.env`. Pemakaian provider dapat dikenai biaya. Pertanyaan, konteks percakapan, dan schema catalog dikirim ke provider untuk membuat SQL; tinjau isinya sebelum memakai data sensitif.
+
+## 10. Opsional: demo Gold di Neon
+
+Mode ini hanya untuk memakai Gold sample yang sudah tersedia di Neon. PostgreSQL lokal, dataset raw, dan Airflow tidak diperlukan jika hanya menjalankan demo tersebut.
+
+Isi `.env` dengan URL koneksi Neon milik Anda:
+
+```dotenv
+ANALYTICS_DB_TARGET=neon
+NEON_DATABASE_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
+NL2SQL_PROVIDER=mock
+```
+
+Placeholder di atas harus diganti dengan URL koneksi yang benar. Alternatif field `POSTGRES_*` masih didukung untuk Neon, tetapi `NEON_DATABASE_URL` lebih diprioritaskan jika terisi.
+
+Restart API dengan target yang benar:
+
+```powershell
+$env:ANALYTICS_DB_TARGET = 'neon'
+$env:NL2SQL_PROVIDER = 'mock'
+uv run python -m uvicorn engine.api.main:app --host 127.0.0.1 --port 8000
+```
+
+Jalankan UI seperti langkah 8. Untuk LLM, gunakan konfigurasi langkah 9. Jangan mengarahkan `LOCAL_DATABASE_URL` ke Neon: kode membatasi nama profil pipeline ke `local`, tetapi alamat tujuan tetap berasal dari konfigurasi URL.
+
+## 11. Perintah pemeriksaan tambahan
+
+```powershell
+# Test yang tersedia dalam proyek
+uv run python -m pytest -q
+
+# Periksa struktur kedua file Compose tanpa menyalakan service
+docker compose -f docker-compose.yml config --quiet
+docker compose -f airflow-docker/docker-compose.yml config --quiet
+
+# Benchmark: membaca database dan dapat memanggil LLM sesuai provider aktif
+uv run python -m engine.benchmarks.run_benchmark
+```
+
+Test generator tidak dikoleksi ketika paket `pipelines.generator` tidak tersedia, sesuai `tests/pipelines/conftest.py`. Lulus unit test tidak membuktikan seluruh DAG atau koneksi LLM berjalan.
+
+## 12. Troubleshooting
+
+| Masalah | Yang diperiksa |
+|---|---|
+| `uv` tidak dikenali | Instal UV dan buka ulang terminal agar PATH diperbarui. |
+| Docker daemon tidak bisa dihubungi | Jalankan Docker Desktop dan tunggu sampai siap. |
+| Port 5432 sudah dipakai | Periksa PostgreSQL atau container lain. Jika mengganti port host pada Compose utama, sesuaikan URL lokal di `.env` dan URL Airflow juga. |
+| Port 8000/8501 sudah dipakai | Hentikan API/UI lama atau container terkait. Jika port API diubah, ubah `ENGINE_URL` pada terminal UI. |
+| `PostgreSQL connection failed` | Periksa status PostgreSQL, URL target, user/password, dan environment variable terminal. Windows memakai `localhost`; Airflow memakai `host.docker.internal`. |
+| `relation ops.pipeline_runs does not exist` | Jalankan inisialisasi schema pada langkah 6 sebelum trigger DAG. |
+| `relation gold... does not exist` atau hasil kosong | Pastikan target engine sesuai database yang sudah dibangun dan DAG selesai. Mode Neon membutuhkan Gold sample yang sudah tersedia. |
+| DAG tidak muncul | Periksa log container Airflow dan mount folder `../dags`. Jalankan `docker exec retail-airflow airflow dags list-import-errors`. |
+| `No raw files found` | Periksa struktur `data/raw` dan mount `../data`; default `RETAIL_RAW_DIR` di container adalah `/opt/project/data/raw`. |
+| `Mock provider does not have a benchmark query...` | Gunakan contoh pertanyaan persis dari langkah 8 atau aktifkan provider LLM. |
+| API gagal karena `OPENAI_API_KEY` | Gunakan key yang valid untuk provider LLM atau set `NL2SQL_PROVIDER=mock`, lalu restart API. |
+| HTTP 503 / `Analysis failed` | Baca log terminal API; pesan HTTP sengaja tidak memuat detail provider/database. |
+| UI tidak bisa menghubungi engine | Pastikan API hidup dan Engine URL pada sidebar UI adalah `http://localhost:8000` untuk mode UV. |
+| Quality gate gagal | Baca log task dan metadata `ops.quality_checks`/`ops.reconciliation_results`; perbaiki sumber atau transformasi sebelum menjalankan ulang. |
+
+## 13. Menghentikan dan menjalankan kembali
+
+Hentikan API/UI dengan **Ctrl+C** pada masing-masing terminal. Hentikan container tanpa menghapus volume:
+
+```powershell
+docker compose -f airflow-docker/docker-compose.yml stop
+docker compose stop postgres
+```
+
+Untuk menjalankan kembali container yang sudah dibuat:
+
+```powershell
+docker compose start postgres
+docker compose -f airflow-docker/docker-compose.yml start
+```
+
+Lalu jalankan API/UI seperti langkah 8. Setelah perubahan konfigurasi Compose, gunakan kembali `up -d` agar perubahan diterapkan. Hindari `down -v` kecuali memang ingin menghapus data volume PostgreSQL atau metadata Airflow.
+
+## 14. Struktur proyek dan batas verifikasi
+
+```text
+airflow-docker/       Image dan Compose Airflow
+dags/dag.py          Orkestrasi tujuh task pipeline
+data/raw/            Dataset lokal
+database/schemas/    DDL Bronze, Silver, Gold, Ops
+pipelines/           Ingestion, transformasi, quality checks, CLI
+shared/db.py         Koneksi PostgreSQL dan pemilihan profil
+engine/              NL-to-SQL, eksekusi SQL, API, benchmark
+ui/                  UI Streamlit dan HTTP client
+tests/               Test proyek
+evidence/            Bukti DAG dan contoh query
+```
+
+Panduan ini diperiksa terhadap source code, opsi CLI `--help`, struktur dataset, dan validitas kedua file Compose. Python pada `.venv` yang diperiksa adalah 3.11.16. Pemeriksaan ini tidak menjalankan instalasi ulang, menyalakan service, menulis ke database, memicu DAG, memanggil LLM, atau memverifikasi UI secara langsung. Konfigurasi Docker/Airflow bawaan ditujukan untuk latihan lokal; panduan ini bukan prosedur deployment produksi.
