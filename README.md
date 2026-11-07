@@ -45,6 +45,7 @@ uv sync --frozen
 
 **Tanda berhasil:** instalasi selesai tanpa error dan folder `.venv` tersedia. `uv sync --frozen` memakai daftar versi dalam `uv.lock`.
 
+**Jika gagal karena direktori: cd ".\Milestone1-AIEN-Omnichannel-Analytics-main\Milestone1-submission"**
 > Semua perintah dalam panduan dijalankan dari folder utama proyek. Setiap membuka terminal baru, pastikan lokasinya tetap di folder tersebut. Tidak perlu mengaktifkan `.venv` secara manual karena perintah Python memakai `uv run`.
 
 ## 2. Buat dan atur file konfigurasi
