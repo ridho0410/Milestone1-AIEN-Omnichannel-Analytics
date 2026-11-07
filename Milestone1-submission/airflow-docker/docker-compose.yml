@@ -1,0 +1,34 @@
+name: retail-milestone1-airflow
+
+services:
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: retail-airflow:2.10.5
+    container_name: retail-airflow
+    command: standalone
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/project/dags
+      AIRFLOW__CORE__FERNET_KEY: "Zq7oC1cWqT9n2cnhD6lAlP4vV3Lsz9aGZb6Hk8nQt1E="
+      AIRFLOW__WEBSERVER__SECRET_KEY: "retail-milestone-1-dashboard"
+      PYTHONPATH: /opt/project
+      RETAIL_RAW_DIR: /opt/project/data/raw
+      ANALYTICS_DB_TARGET: local
+      LOCAL_DATABASE_URL: postgresql://retail:retail@host.docker.internal:5432/retail_analytics
+    volumes:
+      - ../dags:/opt/project/dags:ro
+      - ../pipelines:/opt/project/pipelines:ro
+      - ../shared:/opt/project/shared:ro
+      - ../database:/opt/project/database:ro
+      - ../data:/opt/project/data:ro
+      - airflow_home:/opt/airflow
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  airflow_home:
