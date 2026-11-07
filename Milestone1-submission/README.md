@@ -1,317 +1,416 @@
-# Milestone P1M1 — Omnichannel Retail NL-to-SQL Analytics
+# Panduan Mencoba Proyek Omnichannel Retail
 
-## 1. Skenario
+Panduan ini ditujukan untuk pengguna baru yang ingin menjalankan proyek di komputer sendiri. Perintah menggunakan **Windows dan PowerShell di VS Code**.
 
-Anda bekerja sebagai Data Engineer di perusahaan retail omnichannel. Perusahaan
-menjual produk melalui beberapa channel, memiliki toko fisik dan channel
-digital, menjalankan campaign marketing, serta menerima pembayaran, refund,
-return, dan permintaan bantuan pelanggan.
+Ikuti jalur utama terlebih dahulu: database lokal, pipeline Airflow, lalu aplikasi analitik. Jalur ini memakai mode `mock`, sehingga **tidak memerlukan API key**. Opsi Neon dan LLM tersedia di bagian akhir.
 
-Data perusahaan tidak berasal dari satu sistem yang rapi. Anda akan menerima
-data dari beberapa sumber berikut:
+## Gambaran singkat
 
-- Data operasional customer, order, product, store, promotion, dan channel.
-- Event payment, refund, return, customer support, serta aktivitas web/mobile.
-- Snapshot inventory harian.
-- Data pengeluaran dan atribusi campaign.
-
-Data mentah tersedia melalui Google Drive yang berperan sebagai data lake.
-Gunakan link berikut saat dataset dibagikan:
+Proyek mengubah file mentah menjadi data yang siap dianalisis:
 
 ```text
-https://drive.google.com/drive/folders/1pJrx8eUprI1Z_CJeQDNbRbelrFzlIshy?usp=sharing
+File mentah → Bronze → Silver → Quality gate 1 → Gold → Quality gate 2
 ```
 
-Dataset sengaja memiliki masalah yang umum dijumpai dalam sistem produksi:
+| Bagian | Fungsinya |
+|---|---|
+| Bronze | Menyimpan record dari file sumber. |
+| Silver | Membersihkan, memvalidasi, dan menghapus duplikasi data. |
+| Gold | Menyiapkan tabel untuk analisis penjualan, pelanggan, produk, dan campaign. |
+| Quality gate | Memeriksa apakah data memenuhi aturan sebelum proses dilanjutkan atau dinyatakan berhasil. |
 
-- Duplicate order dan duplicate event.
-- Split payment dan partial refund.
-- Event terlambat dan timestamp yang tidak berurutan.
-- Timestamp dengan timezone berbeda.
-- Missing reference ke customer, product, atau order.
-- Negative quantity.
-- Perubahan profil customer dan kategori product.
-- Order yang dibatalkan tetapi payment-nya sudah captured.
-- Inventory snapshot yang hilang.
-- Banyak promotion dan campaign yang berpotensi menggandakan fact.
+**PostgreSQL** menyimpan tabelnya. **Airflow** menjalankan urutan pipeline. Setelah Gold siap, **API** menerima pertanyaan dan **Streamlit** menampilkan jawaban.
 
-Di sisi lain, perusahaan sudah memiliki NL-to-SQL engine dan UI. Engine hanya
-dapat membaca tabel `gold.*`. Jika Bronze, Silver, dan Gold dibangun dengan
-tidak tepat, engine dapat menghasilkan analisis yang tampak benar tetapi
-sebenarnya salah.
+## 1. Siapkan alat dan buka proyek
 
-## 2. Tujuan Milestone
+Siapkan:
 
-Tujuan Anda adalah membangun pipeline data lokal dari data lake sampai ke
-analytical Gold layer PostgreSQL:
+- VS Code.
+- [UV](https://docs.astral.sh/uv/getting-started/installation/) untuk mengelola Python dan dependensi.
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) yang sudah berjalan dengan Linux containers.
+- Koneksi internet untuk mengunduh dependensi, image Docker, dan dataset.
 
-```text
-Google Drive data lake
-        ↓
-Raw files lokal
-        ↓
-Bronze PostgreSQL
-        ↓
-Silver PostgreSQL
-        ↓
-Gold PostgreSQL
-        ↓
-NL-to-SQL engine
-        ↓
-Analisis dan visualisasi melalui UI
+Unduh ZIP atau clone repository proyek yang dibagikan pemilik proyek. Jika menggunakan ZIP, ekstrak terlebih dahulu.
+
+Di VS Code, pilih **File → Open Folder**, lalu buka folder utama proyek. Folder yang benar berisi `pyproject.toml`, `uv.lock`, `docker-compose.yml`, `dags/`, `pipelines/`, `engine/`, dan `ui/`. Gunakan paket proyek lengkap; folder submission tugas saja belum cukup.
+
+Buka **Terminal → New Terminal** dan pilih **PowerShell**:
+
+```powershell
+uv --version
+docker compose version
+uv python install 3.11
+uv sync --frozen
 ```
 
-Anda harus:
+**Tanda berhasil:** instalasi selesai tanpa error dan folder `.venv` tersedia. `uv sync --frozen` memakai daftar versi dalam `uv.lock`.
 
-1. Mengunduh dan memvalidasi raw data dari Google Drive.
-2. Mempertahankan source evidence ke Bronze tanpa mengubah payload asli.
-3. Mendesain Silver sebagai tabel typed, normalized, tervalidasi, dan memiliki
-   lineage.
-4. Membangun Gold dengan schema, grain, dan definisi metric yang sudah tetap.
-5. Menambahkan quality checks dan reconciliation yang membuktikan hasil
-   pipeline dapat dipercaya.
-6. Menjalankan pertanyaan analitik menggunakan engine yang telah disediakan.
+> Semua perintah dalam panduan dijalankan dari folder utama proyek. Setiap membuka terminal baru, pastikan lokasinya tetap di folder tersebut. Tidak perlu mengaktifkan `.venv` secara manual karena perintah Python memakai `uv run`.
 
-Anda tidak perlu membangun ulang LLM, NL-to-SQL engine, UI, Neon database,
-atau generator data. Komponen tersebut disediakan sebagai consumer dan alat
-verifikasi untuk pipeline Anda.
+## 2. Buat dan atur file konfigurasi
 
-## 3. Sasaran Pembelajaran
+Jalankan untuk membuat `.env` dari contoh bawaan jika belum ada:
 
-Setelah menyelesaikan milestone ini, Anda diharapkan dapat:
+```powershell
+if (-not (Test-Path -LiteralPath '.env')) {
+    Copy-Item -LiteralPath '.env.example' -Destination '.env'
+}
+```
 
-- Mendesain pipeline multi-source dari data lake ke PostgreSQL.
-- Memisahkan source preservation, normalization, dan analytical modeling.
-- Menangani deduplication secara deterministik.
-- Merekonstruksi state dari event payment, refund, return, dan support.
-- Memilih versi customer atau product berdasarkan waktu transaksi.
-- Menggabungkan inventory dan campaign tanpa menggandakan fakta.
-- Menangani record invalid dan missing reference secara eksplisit.
-- Menjaga grain Gold table tetap konsisten.
-- Membuat quality checks untuk uniqueness, reconciliation, dan business rules.
-- Menjelaskan trade-off dan keputusan desain pipeline.
+Buka `.env` di VS Code. Ubah atau tambahkan pengaturan berikut; hindari nama variabel yang ditulis dua kali:
 
-## 4. Kontrak Gold Layer
+```dotenv
+ANALYTICS_DB_TARGET=local
+LOCAL_DATABASE_URL=postgresql://retail:retail@localhost:5432/retail_analytics
+NL2SQL_PROVIDER=mock
+NL2SQL_MAX_ROWS=100
+ENGINE_URL=http://localhost:8000
+```
 
-Gold schema tersedia di `database/schemas/gold.sql`. Jangan mengganti nama
-tabel, nama kolom, grain, tipe data, atau arti metric karena schema ini juga
-digunakan oleh Neon demo, NL-to-SQL engine, dan benchmark.
+**Artinya:** aplikasi membaca database lokal dan memakai kumpulan pertanyaan contoh. User, password, dan database di atas sesuai konfigurasi latihan bawaan.
 
-| Tabel | Grain | Isi utama |
-|---|---|---|
-| `gold.order_360` | Satu baris per order | Nilai order, discount, payment, refund, return, promotion, dan status order |
-| `gold.customer_daily` | Satu customer per tanggal | Order, unit, revenue, refund, return, support, dan status customer |
-| `gold.product_daily` | Satu product per tanggal | Penjualan, revenue, refund unit, inventory, category, dan stockout |
-| `gold.channel_campaign_daily` | Satu tanggal, channel, dan campaign | Spend, attributed order/customer, revenue, refund, ROAS, dan conversion |
-| `gold.executive_kpis_daily` | Satu tanggal bisnis | Total order, revenue, AOV, refund rate, return rate, repeat rate, stockout rate, dan active customer |
+Gunakan kredensial milik sendiri untuk layanan eksternal. Jangan meminta atau membagikan `.env` milik orang lain; file tersebut dapat memuat API key dan password.
 
-Contoh aturan yang harus konsisten:
+## 3. Masukkan dataset
 
-- `net_revenue = gross_merchandise_value - discount_amount + shipping_revenue - refunded_amount`.
-- `refund_rate` membandingkan order yang memiliki refund selesai dengan order
-  yang payment-nya captured.
-- `return_rate` menghitung order yang memiliki return event dibandingkan
-  dengan resolved order.
-- `roas` menghitung attributed net revenue dibagi campaign spend.
-- Setiap Gold table harus memiliki grain sesuai kontrak dan tidak boleh
-  mengalami fact multiplication.
-
-## 5. Pembagian Tanggung Jawab
-
-### Yang harus Anda bangun
-
-- `database/schemas/bronze.sql`
-- `database/schemas/silver.sql`
-- `database/schemas/ops.sql`
-- `pipelines/bronze/build_bronze.py`
-- `pipelines/silver/build_silver.py`
-- `pipelines/gold/build_gold.py`
-- Quality checks dan reconciliation queries.
-- Dokumentasi keputusan transformasi.
-
-### Yang sudah disediakan
-
-- Gold contract di `database/schemas/gold.sql`.
-- NL-to-SQL engine dan schema catalog.
-- ChatGPT-style UI.
-- Test harness dan benchmark.
-- Data generator untuk kebutuhan instructor.
-- Neon demo Gold-only dengan sample data.
-
-## 6. Data Lake Google Drive
-
-Download seluruh isi folder Google Drive ke `data/raw/`. Struktur lokal harus
-menjadi:
+Dataset tidak otomatis ikut saat clone karena `data/raw/` diabaikan oleh Git. Unduh dataset dari sumber yang disebutkan pada bagian **Data Lake Google Drive** di [README tugas](README.md), lalu ekstrak dengan susunan berikut:
 
 ```text
 data/raw/
 ├── manifest.json
-├── operational/
-│   ├── customers.json
-│   ├── customer_profiles.json
-│   ├── customer_addresses.json
-│   ├── products.json
-│   ├── product_categories.json
-│   ├── stores.json
-│   ├── sales_channels.json
-│   ├── promotions.json
-│   ├── orders.json
-│   ├── order_items.json
-│   └── order_promotions.json
-├── events/
-│   ├── payment_events.json
-│   ├── refund_events.json
-│   ├── return_events.json
-│   ├── support_events.json
-│   └── web_events.json
-├── inventory/
-│   └── inventory_snapshots.csv
-└── reference/
-    ├── campaign_spend.csv
-    └── city_reference.json
+├── operational/   # 11 file JSON
+├── events/        # 5 file JSON
+├── inventory/     # inventory_snapshots.csv
+└── reference/     # campaign_spend.csv dan city_reference.json
 ```
 
-## 7. Arsitektur Pipeline
+**Tanda siap:** file seperti `data/raw/operational/orders.json` dapat dibuka. Jangan sampai ada folder tambahan di tengah, misalnya `data/raw/nama-dataset/operational/`.
 
-### Bronze
+Ada 19 file sumber yang diharapkan. Daftar lengkapnya ada di README tugas dan `pipelines/ingestion/files.py`. Sertakan `manifest.json` asli jika disediakan: kode dapat berjalan tanpa manifest, tetapi tidak bisa membandingkan checksum dengan manifest sumber. Tidak adanya manifest bukan bukti bahwa file sudah terverifikasi.
 
-Bronze menyimpan source evidence yang immutable. Payload asli disimpan dalam
-bentuk `JSONB` atau representasi setara, bersama nama file, nomor baris, source
-record identifier, checksum, dan ingestion run.
+## 4. Nyalakan database dan buat tabel
 
-Bronze tidak boleh melakukan business join, deduplication, atau kalkulasi
-metric. Record invalid dan duplicate tetap dipertahankan di layer ini.
-
-### Silver
-
-Silver mengubah payload menjadi tabel bertipe dan ter-normalisasi. Terapkan:
-
-- Timestamp normalization ke UTC.
-- Deduplication dengan deterministic key.
-- Validasi foreign reference.
-- Status normalization.
-- Rejection untuk quantity negatif atau record invalid.
-- Event identity resolution.
-- Temporal version selection.
-- Lineage ke Bronze.
-- Penanganan late-arriving records.
-
-Record yang ditolak harus memiliki alasan di `silver.rejected_records` atau
-mekanisme setara yang terdokumentasi.
-
-### Gold
-
-Gold membaca Silver, bukan file mentah secara langsung. Bangun fact dan
-aggregate secara terpisah sebelum melakukan join ke promotion, campaign,
-inventory, atau event agar tidak terjadi penggandaan nilai.
-
-## 8. Orkestrasi dengan Airflow
-
-Pipeline wajib diorkestrasi menggunakan Airflow. Buat DAG pada file
-`dags/dag.py`; file ini menjadi entrypoint utama untuk menjalankan pipeline
-Anda. Jangan menjadikan perintah CLI manual sebagai pengganti DAG.
-
-DAG minimal harus memiliki tahapan berikut dengan dependency yang jelas:
-
-```text
-validate manifest dan raw files
-            ↓
-initialize PostgreSQL schemas
-            ↓
-load Bronze
-            ↓
-build Silver
-            ↓
-quality gate
-            ↓
-build Gold
-            ↓
-validate Gold dan record pipeline metadata
-```
-
-DAG harus:
-
-- Dapat dijalankan ulang tanpa menggandakan data.
-- Mengirim `pipeline_run_id` ke setiap layer.
-- Menghentikan tahap berikutnya jika quality gate gagal.
-- Menyimpan status dan error pipeline pada schema `ops`.
-- Menggunakan PostgreSQL lokal sebagai target pipeline.
-- Tidak mengunggah Bronze atau Silver ke Neon.
-
-Anda tetap boleh membuat modul Python atau SQL tambahan, tetapi seluruh
-pipeline harus dapat ditelusuri dari `dags/dag.py`.
-
-## 9. Menjalankan Agent dengan UV
-
-Untuk menjalankan NL-to-SQL agent dan ChatGPT-style UI, UV sudah cukup.
-Docker Compose tidak diperlukan jika agent menggunakan Gold sample di Neon.
-
-### Mode Neon demo
-
-Pastikan `.env` lokal berisi koneksi Neon dan OpenAI API key. File ini hanya
-untuk komputer Anda dan tidak boleh di-upload ke GitHub. Jalankan konfigurasi
-berikut di terminal PowerShell pertama:
+Jalankan PostgreSQL:
 
 ```powershell
-uv sync
-uv run python -m uvicorn engine.api.main:app --port 8000
+docker compose up -d postgres
+docker compose exec postgres pg_isready -U retail -d retail_analytics
 ```
 
-Pada terminal kedua, jalankan UI:
+Tunggu sampai muncul pesan **accepting connections**. Jika belum siap, tunggu sebentar lalu ulangi perintah `pg_isready`.
+
+Setelah itu, buat struktur database:
 
 ```powershell
-uv run python -m streamlit run ui/app.py --server.port 8501
+uv run python -m pipelines.ingestion.initialize_database --target local
 ```
 
-Buka `http://localhost:8501`. UI berkomunikasi dengan agent melalui API dan
-tidak mengakses database atau OpenAI secara langsung.
+**Tanda berhasil:** output menyebut `bronze.sql`, `silver.sql`, `gold.sql`, dan `ops.sql` sudah diterapkan.
 
-## 10. File yang Wajib Diunggah ke GitHub
+Langkah inisialisasi wajib dilakukan sebelum menjalankan DAG pertama. Task awal DAG langsung menulis catatan eksekusi ke tabel `ops`. Tabel Gold masih dapat kosong sampai pipeline selesai.
 
-Submission hanya perlu berisi artefak implementasi berikut:
+## 5. Jalankan pipeline melalui Airflow
+
+Nyalakan Airflow:
+
+```powershell
+docker compose -f airflow-docker/docker-compose.yml up -d --build
+docker compose -f airflow-docker/docker-compose.yml logs --tail 100 airflow
+```
+
+Buka **http://localhost:8080**. Gunakan kredensial admin yang muncul pada log startup Airflow, sesuai [panduan standalone Airflow 2.10.5](https://airflow.apache.org/docs/apache-airflow/2.10.5/start.html). Jika belum siap, tunggu lalu jalankan kembali perintah log. Jangan bagikan log yang memuat password.
+
+Di dashboard Airflow:
+
+1. Cari DAG **`retail_omnichannel_pipeline`**.
+2. Aktifkan DAG jika masih paused.
+3. Klik **Trigger DAG**.
+4. Buka tampilan Graph/Grid dan tunggu semua task berstatus **success**.
+
+Urutan task:
 
 ```text
-submission/
-├── dags/
-│   └── dag.py
-├── database/schemas/
-│   ├── bronze.sql
-│   ├── silver.sql
-│   └── ops.sql
-├── pipelines/
-│   ├── bronze/build_bronze.py
-│   ├── silver/build_silver.py
-│   └── gold/build_gold.py
-└── evidence/
-    ├── airflow_run.png
-    └── sample_engine_queries.md
+validate_raw_files → initialize_schemas → load_bronze → build_silver
+    → quality_gate_pre_gold → build_gold → validate_gold
 ```
 
-`database/schemas/gold.sql` tidak perlu dikumpulkan ulang karena merupakan
-schema contract yang sudah diberikan. File berikut juga tidak perlu dikirim:
+**Tanda berhasil:** seluruh task sukses. Jika gate gagal, baca bagian 8 sebelum menjalankan ulang.
 
-- `.env` atau `.env.example`.
-- `pyproject.toml` atau `requirements.txt`.
-- Folder `tests/`.
-- `data_contract_notes.md`.
-- `architecture.md`.
-- `README.md` atau README tambahan.
-- Dataset penuh, `.venv`, cache, dan folder `solution/`.
+Perhatikan sebelum mengulang pipeline: Bronze mengganti record untuk file yang dimuat, sedangkan Silver dan Gold menghapus lalu membangun ulang isi tabel. Gunakan database latihan; versi historis Bronze tidak disimpan secara append-only.
 
-Jangan upload API key atau password database dalam bentuk apa pun.
+DAG juga memiliki jadwal harian pukul 00.00 menurut timezone Airflow. Pause DAG setelah mencoba jika tidak ingin proses berjalan terjadwal. Task gagal memiliki satu retry dengan jeda dua menit.
 
-## 10. Rubrik Penilaian
+## 6. Jalankan API — terminal pertama
 
-| Komponen | Bobot | Indikator |
-|---|---:|---|
-| Bronze ingestion dan source preservation | 15% | Semua input dipertahankan, lineage jelas, append-only/idempotent, manifest tervalidasi |
-| Silver normalization dan quality handling | 25% | Tipe data, UTC, deduplication, referential checks, rejection, dan temporal logic benar |
-| Gold transformation dan grain | 30% | Lima tabel terisi, grain benar, metric benar, tidak ada fact multiplication |
-| Reconciliation dan quality gate | 15% | Pipeline mendeteksi duplikasi, revenue mismatch, refund mismatch, dan broken transformation |
-| Airflow orchestration dan reproducibility | 15% | DAG memiliki dependency yang benar, rerunnable, memiliki failure handling, dan mencatat metadata |
-| **Total** | **100%** | |
+Setelah pipeline berhasil, buka terminal PowerShell untuk API:
 
+```powershell
+$env:ANALYTICS_DB_TARGET = 'local'
+$env:NL2SQL_PROVIDER = 'mock'
+uv run python -m uvicorn engine.api.main:app --host 127.0.0.1 --port 8000
+```
 
-> **Catatan:** Neon hanya berisi sample Gold untuk demo instructor. Pipeline
-> peserta harus berjalan di PostgreSQL lokal dan tidak meng-upload Bronze atau
-> Silver ke Neon.
+Biarkan terminal ini tetap berjalan. Buka **http://localhost:8000/health** di browser.
+
+**Tanda berhasil:** respons memuat `"status":"ok"` dan `"provider":"MockProvider"`. Dokumentasi API ada di **http://localhost:8000/docs**.
+
+Endpoint health hanya memeriksa API. Koneksi database dan hasil analitik baru terbukti ketika pertanyaan berhasil dijalankan.
+
+## 7. Jalankan tampilan aplikasi — terminal kedua
+
+Buka terminal PowerShell baru di folder proyek, lalu jalankan:
+
+```powershell
+$env:ENGINE_URL = 'http://localhost:8000'
+uv run python -m streamlit run ui/app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Buka **http://localhost:8501** dan masukkan pertanyaan:
+
+```text
+What is total net revenue by sales channel?
+```
+
+**Tanda berhasil:** aplikasi menampilkan jawaban dan tabel hasil; grafik muncul jika hasilnya mendukung visualisasi.
+
+Contoh pertanyaan lain:
+
+- `How many orders were placed each day?`
+- `Which campaigns had the best ROAS?`
+- `What was the daily net revenue?`
+
+Mode `mock` hanya menerima pertanyaan yang sudah disediakan di `engine/llm/providers.py`. Kapitalisasi dan spasi dinormalkan, tetapi kalimat bebas atau terjemahan tidak otomatis didukung. Mode ini tetap membaca tabel Gold; hasilnya bukan data palsu yang dibuat tanpa database.
+
+## 8. Pahami hasil quality gate
+
+Quality gate berfungsi sebagai **pemeriksaan kelayakan data**. Aturannya ada di `pipelines/quality/run_quality_checks.py`.
+
+### Kapan pemeriksaan dilakukan?
+
+| Pemeriksaan | Yang diperiksa | Jika ada error |
+|---|---|---|
+| Sebelum Gold: `pre_gold` | Bronze berisi data; ID order/item tidak duplikat; quantity positif; referensi order, product, customer, dan channel tersedia. | Task `quality_gate_pre_gold` gagal. Gold belum dibangun oleh run ini. |
+| Setelah Gold: `post_gold` | Mengulang pemeriksaan Bronze/Silver, memeriksa keunikan baris Gold, rumus revenue, nilai nominal tertentu, stockout, dan kecocokan total antar tabel. | Task `validate_gold` gagal. Run tidak dinyatakan sukses. |
+
+Mencocokkan total antar tabel disebut **rekonsiliasi**. Contohnya, total pendapatan dari tabel per order dibandingkan dengan total pendapatan dari tabel ringkasan harian.
+
+### Bagaimana membaca status?
+
+| Hasil | Artinya | Tindakan |
+|---|---|---|
+| `pass` | Pemeriksaan memenuhi aturan. | Lanjutkan membaca hasil pemeriksaan lainnya. |
+| `fail` dengan level `error` | Ada pelanggaran yang menghentikan gate. | Periksa log, perbaiki data atau transformasi, lalu jalankan ulang. |
+| `fail` dengan level `warning` | Ada masalah yang dicatat, tetapi tidak menghentikan gate. | Tinjau dampaknya pada hasil analisis. |
+| `skipped` | Pemeriksaan dilewati. | Periksa alasannya; status ini bukan bukti lolos. |
+
+`gate_passed=True` berarti tidak ada hasil `fail` berlevel error. Warning dan skipped masih mungkin ada. Jika eksekusi SQL bermasalah, task juga dapat gagal sebelum ringkasan gate muncul.
+
+### Tiga contoh sederhana
+
+**Semua contoh berikut adalah ilustrasi, bukan hasil run proyek.** Log ditampilkan sebagian; contoh lolos mengasumsikan tidak ada kegagalan error lain.
+
+**A. Lolos: tidak ada quantity yang tidak valid**
+
+```text
+silver.order_items_no_negative_quantity: pass (observed=0.0, expected=0.0)
+[quality:pre_gold] gate_passed=True
+```
+
+`observed` adalah hasil pemeriksaan dan `expected` adalah nilai yang diharapkan. Di sini, kode menghitung item dengan `quantity <= 0`. Hasil `0` berarti tidak ditemukan item yang melanggar, sehingga pemeriksaan lolos.
+
+**B. Warning: satu file sumber penting belum tersedia**
+
+```text
+bronze.missing_critical_sources: fail (observed=1.0, expected=0.0)
+[quality:pre_gold] WARNINGS: 1
+[quality:pre_gold] gate_passed=True
+```
+
+Kode mengharapkan tidak ada sumber penting yang hilang, tetapi menemukan satu. Aturan ini berlevel **warning**, sehingga pipeline masih boleh melanjutkan. Hasil keuangan perlu ditinjau karena sumbernya belum lengkap.
+
+**C. Gagal: total pendapatan tidak cocok**
+
+Misalnya, total `net_revenue` di `gold.order_360` adalah `1000000.00`, tetapi total di `gold.executive_kpis_daily` hanya `990000.00`.
+
+```text
+net_revenue_total: fail (variance=10000.0, tolerance=0.01)
+[quality:post_gold] gate_passed=False
+```
+
+`variance` adalah selisih kedua nilai. `tolerance` adalah selisih maksimum yang diizinkan. Selisih `10000.00` melebihi `0.01` dalam satuan nilai data, sehingga rekonsiliasi berlevel **error** ini menggagalkan validasi.
+
+Periksa perhitungan dan join saat membangun ringkasan harian. Validasi akhir yang gagal tidak membatalkan Gold yang sudah dibuat oleh task sebelumnya; perbaiki dan periksa kembali sebelum hasil dipakai.
+
+### Di mana melihat hasil sebenarnya?
+
+Di Airflow, klik task **`quality_gate_pre_gold`** atau **`validate_gold`**, lalu buka **Logs**.
+
+Hasil juga dicatat di database:
+
+| Tabel | Isinya |
+|---|---|
+| `ops.pipeline_runs` | Status keseluruhan run dan pesan error. |
+| `ops.quality_checks` | Nama pemeriksaan, level error/warning, status, nilai aktual, dan target. |
+| `ops.reconciliation_results` | Dua nilai pembanding, selisih, toleransi, dan status. |
+
+Log per-check tidak menampilkan level error/warning. Lihat `severity` pada `ops.quality_checks`. Tabel rekonsiliasi tidak menyimpan severity; acuannya adalah definisi `RECONCILIATIONS` di kode. Rekonsiliasi refund/payment saat ini berlevel warning dan dilewati jika tabel event terkait kosong.
+
+<details>
+<summary>Opsional: perintah untuk melihat hasil run terbaru</summary>
+
+Jalankan pada terminal lain dari folder utama proyek. Perintah berikut hanya membaca database:
+
+```powershell
+$sql = @"
+SELECT pipeline_run_id, status, error_message
+FROM ops.pipeline_runs ORDER BY started_at_utc DESC LIMIT 5;
+
+SELECT check_name, severity, status, observed_value, expected_value
+FROM ops.quality_checks
+WHERE pipeline_run_id = (
+    SELECT pipeline_run_id FROM ops.pipeline_runs
+    ORDER BY started_at_utc DESC LIMIT 1
+)
+ORDER BY check_id;
+
+SELECT metric_name, left_value, right_value, variance, tolerance, status
+FROM ops.reconciliation_results
+WHERE pipeline_run_id = (
+    SELECT pipeline_run_id FROM ops.pipeline_runs
+    ORDER BY started_at_utc DESC LIMIT 1
+)
+ORDER BY reconciliation_id;
+"@
+$sql | docker compose exec -T postgres psql -U retail -d retail_analytics
+```
+
+Pemeriksaan Bronze/Silver dapat muncul berulang karena dijalankan sebelum dan sesudah Gold, serta saat retry. Cocokkan urutan dengan log task. Jika run belum mencapai pemeriksaan setelah Gold, hasil rekonsiliasinya belum tersedia.
+
+</details>
+
+## 9. Jika terjadi masalah
+
+| Masalah | Langkah yang dicoba |
+|---|---|
+| `uv` tidak dikenali | Instal UV melalui tautan bagian 1, lalu buka ulang terminal. |
+| Docker daemon tidak dapat dihubungi | Jalankan Docker Desktop dan tunggu sampai siap. |
+| Port 5432, 8000, atau 8501 sudah dipakai | Periksa proses/container lama. Jika API/UI Docker lama berjalan, hentikan dengan `docker compose stop nl2sql-api analytics-ui` sebelum memakai UV. |
+| Koneksi PostgreSQL gagal | Periksa status container dan `LOCAL_DATABASE_URL`. Lihat log dengan `docker compose logs --tail 100 postgres`. |
+| `ops.pipeline_runs` belum ada | Ulangi inisialisasi pada bagian 4 sebelum trigger DAG. |
+| DAG tidak muncul | Periksa log Airflow dan jalankan `docker exec retail-airflow airflow dags list-import-errors`. |
+| Raw files tidak ditemukan | Cocokkan struktur folder pada bagian 3; data tidak otomatis ikut clone repository. |
+| Gold tidak ada atau hasil kosong | Pastikan pipeline berhasil dan API menggunakan target `local`. Lihat hasil quality gate. |
+| Pertanyaan ditolak mode mock | Gunakan contoh pertanyaan persis dari bagian 7. |
+| UI tidak terhubung / HTTP 503 | Pastikan API hidup, Engine URL di sidebar UI adalah `http://localhost:8000`, lalu baca error pada terminal API. |
+| Konfigurasi berubah tetapi perilaku tetap sama | Periksa variabel `$env:` di terminal; nilainya mengalahkan `.env`. Restart API/UI setelah perubahan. |
+
+Jika port PostgreSQL diubah, sesuaikan port pada Compose utama, URL lokal di `.env`, dan URL Airflow. Proses Python di Windows memakai `localhost`; Airflow di container memakai `host.docker.internal`, sesuai konfigurasi bawaan.
+
+## 10. Selesai mencoba dan menjalankan kembali
+
+Hentikan API dan UI dengan **Ctrl+C** pada masing-masing terminal. Hentikan container:
+
+```powershell
+docker compose -f airflow-docker/docker-compose.yml stop
+docker compose stop postgres
+```
+
+Untuk memakai lagi tanpa menghapus data:
+
+```powershell
+docker compose up -d postgres
+docker compose -f airflow-docker/docker-compose.yml up -d
+```
+
+Lalu jalankan API dan UI seperti bagian 6–7. Trigger pipeline lagi jika perlu memuat atau membangun ulang data. Hindari `down -v` kecuali memang ingin menghapus isi volume database atau metadata Airflow.
+
+## Opsi tambahan
+
+Bagian berikut dapat dicoba setelah alur utama dipahami.
+
+<details>
+<summary>Memakai LLM untuk pertanyaan bebas</summary>
+
+Isi pengaturan berikut di `.env` menggunakan API key milik sendiri:
+
+```dotenv
+NL2SQL_PROVIDER=openai
+OPENAI_API_KEY=ISI_API_KEY_ANDA
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Nama model mengikuti default proyek; aksesnya belum tentu tersedia pada setiap akun. Gunakan model yang tersedia pada akun dan kompatibel dengan adapter proyek, yang mengirim request ke `/chat/completions`.
+
+Hentikan API dengan **Ctrl+C**, lalu restart:
+
+```powershell
+$env:ANALYTICS_DB_TARGET = 'local'
+$env:NL2SQL_PROVIDER = 'openai'
+uv run python -m uvicorn engine.api.main:app --host 127.0.0.1 --port 8000
+```
+
+Pengaturan terminal diperbarui karena nilai `mock` dari langkah awal dapat mengalahkan `.env`. UI tetap dijalankan seperti bagian 7.
+
+Pemakaian LLM dapat dikenai biaya. Pertanyaan, konteks percakapan, dan schema catalog dikirim ke provider; periksa isinya sebelum memakai informasi sensitif.
+
+</details>
+
+<details>
+<summary>Mencoba demo menggunakan Gold sample di Neon</summary>
+
+Opsi ini membutuhkan akses ke database Neon yang sudah memiliki Gold sample. Minta sumber akses yang sesuai kepada pemilik demo atau gunakan database Neon sendiri yang sudah disiapkan.
+
+Untuk demo ini, dataset lokal dan Airflow tidak diperlukan. Isi `.env`:
+
+```dotenv
+ANALYTICS_DB_TARGET=neon
+NEON_DATABASE_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
+NL2SQL_PROVIDER=mock
+```
+
+Ganti seluruh placeholder URL dengan koneksi milik sendiri. Field `POSTGRES_*` masih didukung untuk Neon jika `NEON_DATABASE_URL` tidak terisi.
+
+Hentikan API lama, lalu jalankan:
+
+```powershell
+$env:ANALYTICS_DB_TARGET = 'neon'
+$env:NL2SQL_PROVIDER = 'mock'
+uv run python -m uvicorn engine.api.main:app --host 127.0.0.1 --port 8000
+```
+
+Jalankan UI seperti bagian 7. Engine hanya membaca Gold. Pipeline tetap memakai profil `local`; jangan mengisi `LOCAL_DATABASE_URL` dengan alamat Neon karena pipeline akan menulis ke alamat tersebut.
+
+</details>
+
+<details>
+<summary>Perintah diagnosis dan pengujian</summary>
+
+```powershell
+# Menjalankan pipeline manual untuk diagnosis
+uv run python -m pipelines.run_pipeline --input data/raw --target local
+
+# Menjalankan test yang disediakan
+uv run python -m pytest -q
+
+# Memeriksa kedua file Compose tanpa menyalakan service
+docker compose -f docker-compose.yml config --quiet
+docker compose -f airflow-docker/docker-compose.yml config --quiet
+
+# Menjalankan benchmark pertanyaan
+uv run python -m engine.benchmarks.run_benchmark
+```
+
+Jangan menjalankan CLI pipeline dan DAG secara bersamaan karena keduanya menulis ulang tabel yang sama. Untuk kebutuhan milestone, orkestrasi dan bukti eksekusi tetap melalui DAG.
+
+Benchmark membaca database dan dapat memakai layanan LLM sesuai provider yang aktif. Test generator tidak dikoleksi jika paket `pipelines.generator` tidak tersedia. Lulus test tidak membuktikan DAG atau koneksi provider berjalan langsung.
+
+Jika ingin memilih interpreter di VS Code: **Ctrl+Shift+P → Python: Select Interpreter → `.venv\Scripts\python.exe`**.
+
+Peta file utama: `dags/dag.py` mengatur alur; `pipelines/` berisi transformasi dan quality checks; `database/schemas/` berisi struktur tabel; `shared/db.py` mengatur koneksi; `engine/` berisi API/NL-to-SQL; `ui/` berisi tampilan.
+
+</details>
+
+## Batas panduan
+
+Panduan disusun dari kode dan konfigurasi proyek pada 7 November 2026, dengan pemeriksaan sintaks perintah serta kecocokan contoh quality gate. Panduan belum diuji sebagai instalasi baru di komputer pengguna lain. Contoh log adalah ilustrasi; gunakan hasil Airflow/database pada komputer sendiri sebagai bukti eksekusi. Konfigurasi bawaan ditujukan untuk latihan lokal.
