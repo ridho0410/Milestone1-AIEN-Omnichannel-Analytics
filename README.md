@@ -115,7 +115,6 @@ Nyalakan Airflow:
 
 ```powershell
 docker compose -f airflow-docker/docker-compose.yml up -d --build
-docker compose -f airflow-docker/docker-compose.yml logs --tail 100 airflow
 ```
 
 Buka **http://localhost:8080**. Gunakan kredensial admin yang muncul pada log startup Airflow, sesuai [panduan standalone Airflow 2.10.5](https://airflow.apache.org/docs/apache-airflow/2.10.5/start.html). Jika belum siap, tunggu lalu jalankan kembali perintah log. Jangan bagikan log yang memuat password.
